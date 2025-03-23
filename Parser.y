@@ -15,7 +15,7 @@
     float float_type;  
     double double_type;   
     char char_type;    
-    int bool_type;     
+    bool bool_type;     
     char *string_type; 
     long long_type;
     short short_type;
@@ -50,6 +50,10 @@
 %right POW
 %right LOGICAL_NOT BITWISE_NOT
 %left SHIFT_LEFT SHIFT_RIGHT
+
+%nonassoc IFX
+%nonassoc ELSE
+%left COMMA
 
 %%
 
@@ -95,15 +99,9 @@ return_statement:
     | RETURN
     ;
 
-else_statement:
-    ELSE compound_statement
-    | ELSE IF '(' expression ')' compound_statement else_statement
-    |
-    ;
-
 if_statement:
-    IF '(' expression ')' compound_statement
-    | IF '(' expression ')' compound_statement else_statement
+    IF '(' expression ')' compound_statement %prec IFX
+    | IF '(' expression ')' compound_statement ELSE compound_statement
     ;
 
 while_statement:
@@ -138,9 +136,13 @@ statement_list:
     ;
 
 parameter_list:
-    | parameter_list COMMA parameter
-    | parameter
-    |
+    parameter_list_non_empty
+    |  %prec COMMA
+    ;
+
+parameter_list_non_empty:
+    parameter
+    | parameter_list_non_empty COMMA parameter
     ;
 
 parameter:
@@ -152,10 +154,15 @@ function_declaration:
     ;
 
 argument_list:
-    | argument_list COMMA expression
-    | expression
-    |
+    argument_list_non_empty
+    | 
     ;
+
+argument_list_non_empty:
+    expression
+    | argument_list_non_empty COMMA expression
+    ;
+
 
 function_call:
     IDENTIFIER '(' argument_list ')'

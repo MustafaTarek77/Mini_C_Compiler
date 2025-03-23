@@ -2,89 +2,91 @@
     /* C Declarations */
     #include <stdio.h>
     #include <string.h>
-    #include "parser.tab.h"
+    #include <stdbool.h>
+    #include "Parser.tab.h"
 %}
 %option yylineno
 
 %%
-\/\/.*                 { }  /* Matches single-line comments (// this is a comment) */
-\/\*[\s\S]*?\*\/       { }  /* Matches multi-line comments (/* this is a block comment */) */
 
-";"                    { return SEMICOLON; }  
-","                    { return COMMA; }      /* Separator for function arguments */
-[(){}:]                { return *yytext; } 
+\/\/.*                 { }  
+\/\*[\s\S]*?\*\/       { } 
 
-"="                    { return ASSIGN; } 
-"+"                    { return ADD; }  
-"-"                    { return SUB; }    
-"*"                    { return MUL; }    
-"/"                    { return DIV; }   
-"%"                    { return MOD; }     
-"^"                    { return POW; }  
+";"                    { printf("SEMICOLON: %s\n", yytext); return SEMICOLON; }  
+","                    { printf("COMMA: %s\n", yytext); return COMMA; }  
+[(){}:]                { printf("PUNCTUATOR: %s\n", yytext); return *yytext; } 
 
-"&&"                   { return LOGICAL_AND; }  
-"||"                   { return LOGICAL_OR; }   
-"!"                    { return LOGICAL_NOT; }  
+"="                    { printf("ASSIGN: %s\n", yytext); return ASSIGN; } 
+"+"                    { printf("ADD: %s\n", yytext); return ADD; }  
+"-"                    { printf("SUB: %s\n", yytext); return SUB; }    
+"*"                    { printf("MUL: %s\n", yytext); return MUL; }    
+"/"                    { printf("DIV: %s\n", yytext); return DIV; }   
+"%"                    { printf("MOD: %s\n", yytext); return MOD; }     
+"^"                    { printf("POW: %s\n", yytext); return POW; }  
 
-"=="                   { return EQUAL; }      
-"!="                   { return NOT_EQUAL; }   
-">"                    { return GREATER_THAN; }
-"<"                    { return LESS_THAN; }   
-">="                   { return GREATER_EQUAL; }
-"<="                   { return LESS_EQUAL; }   
+"&&"                   { printf("LOGICAL_AND: %s\n", yytext); return LOGICAL_AND; }  
+"||"                   { printf("LOGICAL_OR: %s\n", yytext); return LOGICAL_OR; }   
+"!"                    { printf("LOGICAL_NOT: %s\n", yytext); return LOGICAL_NOT; }  
 
-"&"                    { return BITWISE_AND; }  
-"|"                    { return BITWISE_OR; }   
-"#"                    { return BITWISE_XOR; }  
-"~"                    { return BITWISE_NOT; }  
-"<<"                   { return SHIFT_LEFT; }   
-">>"                   { return SHIFT_RIGHT; }  
+"=="                   { printf("EQUAL: %s\n", yytext); return EQUAL; }      
+"!="                   { printf("NOT_EQUAL: %s\n", yytext); return NOT_EQUAL; }   
+">"                    { printf("GREATER_THAN: %s\n", yytext); return GREATER_THAN; }
+"<"                    { printf("LESS_THAN: %s\n", yytext); return LESS_THAN; }   
+">="                   { printf("GREATER_EQUAL: %s\n", yytext); return GREATER_EQUAL; }
+"<="                   { printf("LESS_EQUAL: %s\n", yytext); return LESS_EQUAL; }   
 
-"true"                 { yylval.bool_value = true; return BOOL_VALUE; }  
-"false"                { yylval.bool_value = false; return BOOL_VALUE; }
+"&"                    { printf("BITWISE_AND: %s\n", yytext); return BITWISE_AND; }  
+"|"                    { printf("BITWISE_OR: %s\n", yytext); return BITWISE_OR; }   
+"#"                    { printf("BITWISE_XOR: %s\n", yytext); return BITWISE_XOR; }  
+"~"                    { printf("BITWISE_NOT: %s\n", yytext); return BITWISE_NOT; }  
+"<<"                   { printf("SHIFT_LEFT: %s\n", yytext); return SHIFT_LEFT; }   
+">>"                   { printf("SHIFT_RIGHT: %s\n", yytext); return SHIFT_RIGHT; }  
 
-"int"                  { return INT; }   
-"float"                { return FLOAT; } 
-"double"               { return DOUBLE; }  
-"string"               { return STRING; } 
-"char"                 { return CHAR; }    
-"bool"                 { return BOOL; }    
-"long"                 { return LONG; }    
-"short"                { return SHORT; }   
-"unsigned"             { return UNSIGNED; }
-"signed"               { return SIGNED; }  
-"void"                 { return VOID; }   
+"true"                 { yylval.bool_type = true; printf("BOOL_VALUE: %s\n", yytext); return BOOL_VALUE; }  
+"false"                { yylval.bool_type = false; printf("BOOL_VALUE: %s\n", yytext); return BOOL_VALUE; }
 
-"print"                { return PRINT; }    
-"return"               { return RETURN; }   
-"if"                   { return IF; }       
-"else"                 { return ELSE; }     
-"for"                  { return FOR; }      
-"while"                { return WHILE; }    
-"do"                   { return DO; }       
-"switch"               { return SWITCH; }   
-"case"                 { return CASE; }    
-"default"              { return DEFAULT; }  
-"break"                { return BREAK; }    
-"continue"             { return CONTINUE; } 
+"int"                  { printf("INT: %s\n", yytext); return INT; }   
+"float"                { printf("FLOAT: %s\n", yytext); return FLOAT; } 
+"double"               { printf("DOUBLE: %s\n", yytext); return DOUBLE; }  
+"string"               { printf("STRING: %s\n", yytext); return STRING; } 
+"char"                 { printf("CHAR: %s\n", yytext); return CHAR; }    
+"bool"                 { printf("BOOL: %s\n", yytext); return BOOL; }    
+"long"                 { printf("LONG: %s\n", yytext); return LONG; }    
+"short"                { printf("SHORT: %s\n", yytext); return SHORT; }   
+"unsigned"             { printf("UNSIGNED: %s\n", yytext); return UNSIGNED; }
+"signed"               { printf("SIGNED: %s\n", yytext); return SIGNED; }  
+"void"                 { printf("VOID: %s\n", yytext); return VOID; }   
 
-[a-zA-Z_][a-zA-Z0-9_]*    {yylval.string_value = strdup(yytext); return IDENTIFIER;}  /* Identifiers (Variable & Function Names) */
+"print"                { printf("PRINT: %s\n", yytext); return PRINT; }    
+"return"               { printf("RETURN: %s\n", yytext); return RETURN; }   
+"if"                   { printf("IF: %s\n", yytext); return IF; }       
+"else"                 { printf("ELSE: %s\n", yytext); return ELSE; }     
+"for"                  { printf("FOR: %s\n", yytext); return FOR; }      
+"while"                { printf("WHILE: %s\n", yytext); return WHILE; }    
+"do"                   { printf("DO: %s\n", yytext); return DO; }       
+"switch"               { printf("SWITCH: %s\n", yytext); return SWITCH; }   
+"case"                 { printf("CASE: %s\n", yytext); return CASE; }    
+"default"              { printf("DEFAULT: %s\n", yytext); return DEFAULT; }  
+"break"                { printf("BREAK: %s\n", yytext); return BREAK; }    
+"continue"             { printf("CONTINUE: %s\n", yytext); return CONTINUE; } 
 
-"const[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]+([a-zA-Z_][a-zA-Z0-9_]*)" { yylval.string_value = strdup($1); return CONSTANT; }  /* Constants */
+[A-Z]+                 { yylval.string_type = strdup(yytext); printf("CONSTANT: %s\n", yytext); return CONSTANT; }
 
--?[0-9]+                 { yylval.int_value = atoi(yytext); return INTEGER_VALUE; }  /* Integer */  
--?[0-9]+\.[0-9]+         { yylval.float_value = atof(yytext); return FLOAT_VALUE; }  /* Floating point */
+[a-zA-Z_][a-zA-Z0-9_]*    { yylval.string_type = strdup(yytext); printf("IDENTIFIER: %s\n", yytext); return IDENTIFIER; } 
 
-\".*\"        {yylval.string_value = strdup(yytext); return STRING_VALUE;}   /* String Values */
+-?[0-9]+                 { yylval.int_type = atoi(yytext); printf("INTEGER_VALUE: %s\n", yytext); return INTEGER_VALUE; }    
+-?[0-9]+\.[0-9]+         { yylval.float_type = atof(yytext); printf("FLOAT_VALUE: %s\n", yytext); return FLOAT_VALUE; }  
 
-\'.\'         {yylval.string_value = strdup(yytext); return CHAR_VALUE;}    /* Character Values */
+\".*\"        { yylval.string_type = strdup(yytext); printf("STRING_VALUE: %s\n", yytext); return STRING_VALUE; }   
 
-[ \t\r\n]+             { /* Ignore spaces, tabs, and newlines */ }   /* Whitespace (Ignored) */
+\'.\'         { yylval.string_type = strdup(yytext); printf("CHAR_VALUE: %s\n", yytext); return CHAR_VALUE; }  
 
-.                      { printf("Unexpected character: %s\n", yytext); }   /* Unrecognized Tokens */
+[ \t\r\n]+             { }   
+
+.                      { printf("Unexpected character: %s\n", yytext); }  
 
 %%              
-/* C Code Section */
+
 int yywrap(void) 
 {
     return 1;
