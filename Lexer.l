@@ -10,7 +10,7 @@
 %%
 
 \/\/.*                 { }  
-\/\*[\s\S]*?\*\/       { } 
+\/\*.*\*\/       { } 
 
 ";"                    { printf("SEMICOLON: %s\n", yytext); return SEMICOLON; }  
 ","                    { printf("COMMA: %s\n", yytext); return COMMA; }  
@@ -70,7 +70,7 @@
 "break"                { printf("BREAK: %s\n", yytext); return BREAK; }    
 "continue"             { printf("CONTINUE: %s\n", yytext); return CONTINUE; } 
 
-[A-Z]+                 { yylval.string_type = strdup(yytext); printf("CONSTANT: %s\n", yytext); return CONSTANT; }
+[A-Z]+                { yylval.string_type = strdup(yytext); printf("CONSTANT: %s\n", yytext); return CONSTANT; }
 
 [a-zA-Z_][a-zA-Z0-9_]*    { yylval.string_type = strdup(yytext); printf("IDENTIFIER: %s\n", yytext); return IDENTIFIER; } 
 

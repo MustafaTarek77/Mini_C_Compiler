@@ -63,21 +63,21 @@ program:
     ;
 
 statement:
-    declaration_statement SEMICOLON
-    | assignment_statement SEMICOLON
-    | print_statement SEMICOLON
-    | return_statement SEMICOLON
-    | expression SEMICOLON
-    | function_call SEMICOLON
-    | function_declaration 
-    | break_statement SEMICOLON
-    | continue_statement SEMICOLON
-    | if_statement
-    | while_statement
-    | for_statement
-    | do_while_statement
-    | switch_statement
-    | compound_statement
+    declaration_statement SEMICOLON { printf("Parsed: Declaration Statement\n"); }
+    | assignment_statement SEMICOLON { printf("Parsed: Assignment Statement\n"); }
+    | print_statement SEMICOLON { printf("Parsed: Print Statement\n"); }
+    | return_statement SEMICOLON { printf("Parsed: Return Statement\n"); }
+    | expression SEMICOLON { printf("Parsed: Expression\n"); }
+    | function_call SEMICOLON { printf("Parsed: Function Call\n"); }
+    | function_declaration { printf("Parsed: Function Declaration\n"); }
+    | if_statement { printf("Parsed: If Statement\n"); }
+    | while_statement { printf("Parsed: While Loop\n"); }
+    | do_while_statement SEMICOLON { printf("Parsed: Do-While Loop\n"); }
+    | for_statement { printf("Parsed: For Loop\n"); }
+    | switch_statement { printf("Parsed: Switch Statement\n"); }
+    | compound_statement { printf("Parsed: Compound Statement\n"); }
+    | break_statement SEMICOLON { printf("Parsed: Break\n"); }
+    | continue_statement SEMICOLON { printf("Parsed: Continue\n"); }
     ;
 
 declaration_statement:
@@ -119,8 +119,8 @@ switch_statement :  SWITCH '(' IDENTIFIER ')' '{' case_statement '}'
                  |  SWITCH '(' IDENTIFIER ')' '{' case_statement  default_statement'}'
                  ;
 
-case_statement : CASE INT ':' statement case_statement
-      | CASE BOOL ':' statement case_statement
+case_statement : CASE INTEGER_VALUE ':' statement case_statement
+      | CASE BOOL_VALUE ':' statement case_statement
       |
       ;
 
@@ -212,4 +212,10 @@ type:
 
 void yyerror(const char *s) {
     fprintf(stderr, "Error: %s at line %d\n", s, yylineno);
+}
+
+int main(void)
+{
+    yyparse();
+    return 0;
 }
