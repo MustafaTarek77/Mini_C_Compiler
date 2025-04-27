@@ -1,0 +1,84 @@
+int add(int a, int b) {
+    return a + b;
+}
+
+void printAll() {
+}
+
+void mainFunc() {
+    // Test variable and constant declarations, arithmetic, function call
+    int x = 100;
+    float y = 2.5;
+    char ch = 'A';
+    string str = "test 123";
+    bool flag = true;
+    int CONST_A = 10;
+    int z = add(x, CONST_A);
+
+    print("Sum: ");
+    print(z);
+
+    if (flag && x > 90) {
+        print("Condition1 met");
+    } else if (y < 5.0) {
+        print("Condition2 met");
+    } else {
+        print("No conditions met");
+    }
+
+    int count = 0;
+    while (count < 3) {
+        print(count);
+        count++;
+    }
+
+    do {
+        print("In do-while");
+        count--;
+    } while (count > 0);
+
+    int i;
+    for (i = 0; i < 5; i++;) {
+        print(i);
+        if (i == 2) {
+            continue;
+        }
+        if (i == 4) {
+            break;
+        }
+    }
+
+    switch (x) {
+        case 100:
+            {
+            print("Case 100");
+            break;
+            }
+        case 99:
+            {
+            print("Case 99");
+            break;
+            }
+        default:
+            {
+            print("Default Case");
+            break;
+            }
+    }
+
+    print("End of mainFunc");
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

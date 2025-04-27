@@ -1,0 +1,4 @@
+warning: function printAll declared at line 5 but never used
+warning: function mainFunc declared at line 8 but never used
+warning: identifier ch declared at line 12 but never used
+warning: identifier str declared at line 13 but never used

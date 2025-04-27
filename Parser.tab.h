@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 88 "Parser.y"
+
+#include<stdbool.h>
+
+#line 53 "Parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -56,59 +62,56 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     INT = 258,                     /* INT  */
     FLOAT = 259,                   /* FLOAT  */
-    DOUBLE = 260,                  /* DOUBLE  */
-    CHAR = 261,                    /* CHAR  */
-    BOOL = 262,                    /* BOOL  */
-    STRING = 263,                  /* STRING  */
-    LONG = 264,                    /* LONG  */
-    SHORT = 265,                   /* SHORT  */
-    SEMICOLON = 266,               /* SEMICOLON  */
-    COMMA = 267,                   /* COMMA  */
-    ASSIGN = 268,                  /* ASSIGN  */
-    ADD = 269,                     /* ADD  */
-    SUB = 270,                     /* SUB  */
-    MUL = 271,                     /* MUL  */
-    DIV = 272,                     /* DIV  */
-    MOD = 273,                     /* MOD  */
-    POW = 274,                     /* POW  */
-    LOGICAL_AND = 275,             /* LOGICAL_AND  */
-    LOGICAL_OR = 276,              /* LOGICAL_OR  */
-    LOGICAL_NOT = 277,             /* LOGICAL_NOT  */
-    EQUAL = 278,                   /* EQUAL  */
-    NOT_EQUAL = 279,               /* NOT_EQUAL  */
-    GREATER_THAN = 280,            /* GREATER_THAN  */
-    LESS_THAN = 281,               /* LESS_THAN  */
-    GREATER_EQUAL = 282,           /* GREATER_EQUAL  */
-    LESS_EQUAL = 283,              /* LESS_EQUAL  */
-    BITWISE_AND = 284,             /* BITWISE_AND  */
-    BITWISE_OR = 285,              /* BITWISE_OR  */
-    BITWISE_XOR = 286,             /* BITWISE_XOR  */
-    BITWISE_NOT = 287,             /* BITWISE_NOT  */
-    SHIFT_LEFT = 288,              /* SHIFT_LEFT  */
-    SHIFT_RIGHT = 289,             /* SHIFT_RIGHT  */
-    BOOL_VALUE = 290,              /* BOOL_VALUE  */
-    INTEGER_VALUE = 291,           /* INTEGER_VALUE  */
-    FLOAT_VALUE = 292,             /* FLOAT_VALUE  */
-    STRING_VALUE = 293,            /* STRING_VALUE  */
-    CHAR_VALUE = 294,              /* CHAR_VALUE  */
-    UNSIGNED = 295,                /* UNSIGNED  */
-    SIGNED = 296,                  /* SIGNED  */
-    VOID = 297,                    /* VOID  */
-    PRINT = 298,                   /* PRINT  */
-    RETURN = 299,                  /* RETURN  */
-    IF = 300,                      /* IF  */
-    ELSE = 301,                    /* ELSE  */
-    FOR = 302,                     /* FOR  */
-    WHILE = 303,                   /* WHILE  */
-    DO = 304,                      /* DO  */
-    SWITCH = 305,                  /* SWITCH  */
-    CASE = 306,                    /* CASE  */
-    DEFAULT = 307,                 /* DEFAULT  */
-    BREAK = 308,                   /* BREAK  */
-    CONTINUE = 309,                /* CONTINUE  */
-    IDENTIFIER = 310,              /* IDENTIFIER  */
-    CONSTANT = 311,                /* CONSTANT  */
-    IFX = 312                      /* IFX  */
+    CHAR = 260,                    /* CHAR  */
+    BOOL = 261,                    /* BOOL  */
+    STRING = 262,                  /* STRING  */
+    PRINT = 263,                   /* PRINT  */
+    VOID = 264,                    /* VOID  */
+    RETURN = 265,                  /* RETURN  */
+    CONTINUE = 266,                /* CONTINUE  */
+    SWITCH = 267,                  /* SWITCH  */
+    BREAK = 268,                   /* BREAK  */
+    CASE = 269,                    /* CASE  */
+    DEFAULT = 270,                 /* DEFAULT  */
+    IF = 271,                      /* IF  */
+    ELSE = 272,                    /* ELSE  */
+    FOR = 273,                     /* FOR  */
+    WHILE = 274,                   /* WHILE  */
+    DO = 275,                      /* DO  */
+    BOOL_VALUE = 276,              /* BOOL_VALUE  */
+    LOGICAL_AND = 277,             /* LOGICAL_AND  */
+    LOGICAL_OR = 278,              /* LOGICAL_OR  */
+    LOGICAL_NOT = 279,             /* LOGICAL_NOT  */
+    EQUAL = 280,                   /* EQUAL  */
+    NOT_EQUAL = 281,               /* NOT_EQUAL  */
+    BITWISE_OR = 282,              /* BITWISE_OR  */
+    BITWISE_AND = 283,             /* BITWISE_AND  */
+    BITWISE = 284,                 /* BITWISE  */
+    NOT = 285,                     /* NOT  */
+    SEMICOLON = 286,               /* SEMICOLON  */
+    COMMA = 287,                   /* COMMA  */
+    MOD = 288,                     /* MOD  */
+    ADD = 289,                     /* ADD  */
+    SUB = 290,                     /* SUB  */
+    MUL = 291,                     /* MUL  */
+    DIV = 292,                     /* DIV  */
+    POW = 293,                     /* POW  */
+    SHIFT_LEFT = 294,              /* SHIFT_LEFT  */
+    SHIFT_RIGHT = 295,             /* SHIFT_RIGHT  */
+    GREATER_THAN = 296,            /* GREATER_THAN  */
+    LESS_THAN = 297,               /* LESS_THAN  */
+    ASSIGN = 298,                  /* ASSIGN  */
+    GREATER_EQUAL = 299,           /* GREATER_EQUAL  */
+    LESS_EQUAL = 300,              /* LESS_EQUAL  */
+    POST_INC = 301,                /* POST_INC  */
+    POST_DEC = 302,                /* POST_DEC  */
+    CONSTANT = 303,                /* CONSTANT  */
+    IDENTIFIER = 304,              /* IDENTIFIER  */
+    STRING_VALUE = 305,            /* STRING_VALUE  */
+    CHAR_VALUE = 306,              /* CHAR_VALUE  */
+    INTEGER_VALUE = 307,           /* INTEGER_VALUE  */
+    FLOAT_VALUE = 308,             /* FLOAT_VALUE  */
+    BITWISE_NOT = 309              /* BITWISE_NOT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -117,18 +120,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "Parser.y"
+#line 78 "Parser.y"
+ 
+ int int_type;
+ char* string_type; 
+ float float_type;
+ bool bool_type;
+ char char_type;
+ struct Node *node;
 
-    int int_type;     
-    float float_type;  
-    double double_type;   
-    char char_type;    
-    bool bool_type;     
-    char *string_type; 
-    long long_type;
-    short short_type;
-
-#line 132 "Parser.tab.h"
+#line 133 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
