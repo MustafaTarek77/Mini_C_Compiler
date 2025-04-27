@@ -1,0 +1,142 @@
+add:
+	pop b
+	pop a
+	push a
+	push b
+	add
+	return
+	end add
+printAll:
+	end printAll
+mainFunc:
+	push 100
+	pop x
+	push 2.500000
+	pop y
+	push 'A'
+	pop ch
+	push "test 123"
+	pop str
+	push 1
+	pop flag
+	push 10
+	pop CONST_A
+	push x
+	post_inc
+	pop x
+	push x
+	post_dec
+	pop x
+	push x
+	pre_inc
+	push x
+	pre_dec
+	push x
+	push CONST_A
+	call add
+	pop z
+	push "Sum: "
+	print
+	push z
+	print
+	push flag
+	push x
+	push 90
+	greater_than
+	logical_and
+	jf false_label_1
+	push "Condition1 met"
+	print
+	jmp end_if_1
+false_label_1:
+	push y
+	push 5.000000
+	less_than
+	jf false_label_2
+	push "Condition2 met"
+	print
+	jmp end_if_1
+false_label_2:
+	push "No conditions met"
+	print
+end_if_1:
+	push 0
+	pop count
+start_while_1:
+	push count
+	push 3
+	less_than
+	jf false_label_3
+	push count
+	print
+	push count
+	post_inc
+	pop count
+	jmp start_while_1
+false_label_3:
+start_do_while_2:
+	push "In do-while"
+	print
+	push count
+	post_dec
+	pop count
+	push count
+	push 0
+	greater_than
+	jf false_label_4
+	jmp start_do_while_2
+false_label_4:
+	push 0
+	pop i
+start_for_3:
+	push i
+	push 5
+	less_than
+	jf false_label_5
+	push i
+	post_inc
+	pop i
+	push i
+	print
+	push i
+	push 2
+	equal
+	jf false_label_6
+	continue
+	jmp end_if_2
+false_label_6:
+end_if_2:
+	push i
+	push 4
+	equal
+	jf false_label_7
+	jmp end_loop_0
+	jmp end_if_3
+false_label_7:
+end_if_3:
+	jmp start_for_3
+false_label_5:
+	push 100
+	push x
+	equal
+	jf false_label_8
+	push "Case 100"
+	print
+	jmp end_loop_4
+false_label_8:
+	push 99
+	push x
+	equal
+	jf false_label_9
+	push "Case 99"
+	print
+	jmp end_loop_4
+false_label_9:
+	push "Default Case"
+	print
+	jmp end_loop_4
+end_loop_4:
+	push "End of mainFunc"
+	print
+	return
+	end mainFunc

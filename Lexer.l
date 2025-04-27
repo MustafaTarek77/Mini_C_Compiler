@@ -1,74 +1,399 @@
 %{
     #include "Parser.tab.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    #define LOG_ENABLED 1
+
+    void log_token(const char *token);
+
 %}
+
 %option yylineno
 
 %%
 
-";"                   {return SEMICOLON;}
-","                   {return COMMA;}
-[(){}:]               {return *yytext;}
+";"                   { 
+                        return SEMICOLON; 
+                    }
 
-"="        {return ASSIGN;}  
-"+"        {return ADD;} 
-"++"        {return POST_INC;} 
-"-"        {return SUB;}
-"--"        {return POST_DEC;} 
-"*"        {return MUL;}
-"/"        {return DIV;}      
-"%"        {return MOD;}
-"^"        {return POW;}
+","                   { 
+                        return COMMA; 
+                    }
 
-"&&"      {return LOGICAL_AND;}
-"||"       {return LOGICAL_OR;}
-"!"        {return LOGICAL_NOT;}
+[(){}:]               { 
+                        return *yytext; 
+                    }
 
-"=="       {return EQUAL;}
-"!="       {return NOT_EQUAL;}
-">"        {return GREATER_THAN;}
-"<"        {return LESS_THAN;}
-">="                   {return GREATER_EQUAL; }
-"<="                   {return LESS_EQUAL; }   
+"="        { 
+    #if LOG_ENABLED
+        log_token("ASSIGN");
+    #endif
+    return ASSIGN;
+}  
 
-"&"        {return BITWISE_AND;}
-"|"        {return BITWISE_OR;}
-"~"        {return BITWISE_NOT; } 
-"<<"       {return SHIFT_LEFT;}
-">>"       {return SHIFT_RIGHT;}
+"+"        { 
+    #if LOG_ENABLED
+        log_token("ADD");
+    #endif
+    return ADD;
+} 
 
-"true"     {yylval.bool_type = true; return BOOL_VALUE;}
-"false"    {yylval.bool_type = false;return BOOL_VALUE;} 
+"++"        { 
+    #if LOG_ENABLED
+        log_token("PRE_POST_INC");
+    #endif
+    return PRE_POST_INC; 
+} 
 
-"int"                  { return INT; }   
-"float"                { return FLOAT; }  
-"string"               { return STRING; } 
-"char"                 {  return CHAR; }    
-"bool"                 { return BOOL; }    
-"void"                 {  return VOID; }   
+"-"        { 
+    #if LOG_ENABLED
+        log_token("SUB");
+    #endif
+    return SUB;
+} 
 
-"print"    {return PRINT;}
-"return"   {return RETURN;}
-"if"       {return IF;}
-"else"     {return ELSE;}
-"for"      {return FOR;}
-"while"    {return WHILE;}
-"do"       {return DO;}
-"switch"   {return SWITCH;}
-"case"     {return CASE;}
-"break"    {return BREAK;}
-"default"  {return DEFAULT;}
-"continue" {return CONTINUE; }     
+"--"        { 
+    #if LOG_ENABLED
+        log_token("PRE_POST_DEC");
+    #endif
+    return PRE_POST_DEC; 
+} 
 
-[A-Z]+                 {yylval.string_type = strdup(yytext); return CONSTANT;}
-[a-zA-Z_][a-zA-Z0-9_]* {yylval.string_type = strdup(yytext); return IDENTIFIER;}
+"*"        { 
+    #if LOG_ENABLED
+        log_token("MUL");
+    #endif
+    return MUL;
+} 
 
-[0-9]+         {yylval.int_type = atoi(yytext); return INTEGER_VALUE;}
--?[0-9]+\.[0-9]+ {yylval.float_type= atof(yytext);return FLOAT_VALUE;}
+"/"        { 
+    #if LOG_ENABLED
+        log_token("DIV");
+    #endif
+    return DIV; 
+}      
 
-\".*\"        {yylval.string_type = strdup(yytext); return STRING_VALUE;}
-\'.\'         {yylval.string_type = strdup(yytext); return CHAR_VALUE;}
+"%"        { 
+    #if LOG_ENABLED
+        log_token("MOD");
+    #endif
+    return MOD;
+} 
+
+"^"        { 
+    #if LOG_ENABLED
+        log_token("POW");
+    #endif
+    return POW;
+}
+
+"&&"      { 
+    #if LOG_ENABLED
+        log_token("LOGICAL_AND");
+    #endif
+    return LOGICAL_AND; 
+}
+
+"||"       { 
+    #if LOG_ENABLED
+        log_token("LOGICAL_OR");
+    #endif
+    return LOGICAL_OR; 
+}
+
+"!"        { 
+    #if LOG_ENABLED
+        log_token("LOGICAL_NOT");
+    #endif
+    return LOGICAL_NOT; 
+}
+
+"=="       { 
+    #if LOG_ENABLED
+        log_token("EQUAL");
+    #endif
+    return EQUAL;
+}
+
+"!="       { 
+    #if LOG_ENABLED
+        log_token("NOT_EQUAL");
+    #endif
+    return NOT_EQUAL; 
+}
+
+">"        { 
+    #if LOG_ENABLED
+        log_token("GREATER_THAN");
+    #endif
+    return GREATER_THAN;
+}
+
+"<"        { 
+    #if LOG_ENABLED
+        log_token("LESS_THAN");
+    #endif
+    return LESS_THAN;
+}
+
+">="       { 
+    #if LOG_ENABLED
+        log_token("GREATER_EQUAL");
+    #endif
+    return GREATER_EQUAL; 
+}
+
+"<="       { 
+    #if LOG_ENABLED
+        log_token("LESS_EQUAL");
+    #endif
+    return LESS_EQUAL; 
+}
+
+"&"        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_AND");
+    #endif
+    return BITWISE_AND;
+}
+
+"|"        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_OR");
+    #endif
+    return BITWISE_OR;
+}
+
+"~"        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_NOT");
+    #endif
+    return BITWISE_NOT;
+} 
+
+"<<"       { 
+    #if LOG_ENABLED
+        log_token("SHIFT_LEFT");
+    #endif
+    return SHIFT_LEFT;
+}
+
+">>"       { 
+    #if LOG_ENABLED
+        log_token("SHIFT_RIGHT");
+    #endif
+    return SHIFT_RIGHT;
+}
+
+"true"     { 
+    yylval.bool_type = true;
+    #if LOG_ENABLED
+        log_token("BOOL_VALUE: true");
+    #endif
+    return BOOL_VALUE;
+}
+
+"false"    { 
+    yylval.bool_type = false;
+    #if LOG_ENABLED
+        log_token("BOOL_VALUE: false");
+    #endif
+    return BOOL_VALUE; 
+}
+
+"int"      { 
+    #if LOG_ENABLED
+        log_token("INT");
+    #endif
+    return INT;
+}
+
+"float"    { 
+    #if LOG_ENABLED
+        log_token("FLOAT");
+    #endif
+    return FLOAT;
+}
+
+"string"   { 
+    #if LOG_ENABLED
+        log_token("STRING");
+    #endif
+    return STRING;
+}
+
+"char"     { 
+    #if LOG_ENABLED
+        log_token("CHAR");
+    #endif
+    return CHAR;
+}
+
+"bool"     { 
+    #if LOG_ENABLED
+        log_token("BOOL");
+    #endif
+    return BOOL;
+}
+
+"void"     { 
+    #if LOG_ENABLED
+        log_token("VOID");
+    #endif
+    return VOID;
+}
+
+"print"    { 
+    #if LOG_ENABLED
+        log_token("PRINT");
+    #endif
+    return PRINT;
+}
+
+"return"   { 
+    #if LOG_ENABLED
+        log_token("RETURN");
+    #endif
+    return RETURN;
+}
+
+"if"       { 
+    #if LOG_ENABLED
+        log_token("IF");
+    #endif
+    return IF;
+}
+
+"else"     { 
+    #if LOG_ENABLED
+        log_token("ELSE");
+    #endif
+    return ELSE;
+}
+
+"for"      { 
+    #if LOG_ENABLED
+        log_token("FOR");
+    #endif
+    return FOR;
+}
+
+"while"    { 
+    #if LOG_ENABLED
+        log_token("WHILE");
+    #endif
+    return WHILE;
+}
+
+"do"       { 
+    #if LOG_ENABLED
+        log_token("DO");
+    #endif
+    return DO;
+}
+
+"switch"   { 
+    #if LOG_ENABLED
+        log_token("SWITCH");
+    #endif
+    return SWITCH;
+}
+
+"case"     { 
+    #if LOG_ENABLED
+        log_token("CASE");
+    #endif
+    return CASE;
+}
+
+"break"    { 
+    #if LOG_ENABLED
+        log_token("BREAK");
+    #endif
+    return BREAK;
+}
+
+"default"  { 
+    #if LOG_ENABLED
+        log_token("DEFAULT");
+    #endif
+    return DEFAULT;
+}
+
+"continue" { 
+    #if LOG_ENABLED
+        log_token("CONTINUE");
+    #endif
+    return CONTINUE;
+}
+
+"const"    { 
+    #if LOG_ENABLED
+        log_token("CONSTANT");
+    #endif
+    return CONSTANT;
+}
+
+[a-zA-Z_][a-zA-Z0-9_]* { 
+    yylval.string_type = strdup(yytext);
+    #if LOG_ENABLED
+        log_token("IDENTIFIER");
+    #endif
+    return IDENTIFIER; 
+}
+
+[0-9]+         { 
+    yylval.int_type = atoi(yytext);
+    #if LOG_ENABLED
+        log_token("INTEGER_VALUE");
+    #endif
+    return INTEGER_VALUE; 
+}
+
+-?[0-9]+\.[0-9]+ { 
+    yylval.float_type = atof(yytext);
+    #if LOG_ENABLED
+        log_token("FLOAT_VALUE");
+    #endif
+    return FLOAT_VALUE; 
+}
+
+\".*\"        { 
+    yylval.string_type = strdup(yytext); 
+    #if LOG_ENABLED
+        log_token("STRING_VALUE");
+    #endif
+    return STRING_VALUE; 
+}
+
+\'.\'         { 
+    yylval.string_type = strdup(yytext); 
+    #if LOG_ENABLED
+        log_token("CHAR_VALUE");
+    #endif
+    return CHAR_VALUE; 
+}
 
 \/\/[\s\t]*.*[\s\t]*  {}
-[ \t\r\n]+             { }               
-.              {return *yytext;}
+
+[ \t\r\n]+             { }
+
+.              { 
+    #if LOG_ENABLED
+        log_token("UNKNOWN TOKEN");
+    #endif
+    return *yytext;
+}
+
 %%
+
+void log_token(const char *token) {
+    FILE *log_file = fopen("./output/tokens.log", "a");
+    if (log_file) {
+        fprintf(log_file, "Detected Token: %s\n", token);
+        fclose(log_file);
+    } else {
+        fprintf(stderr, "Error opening log file.\n");
+    }
+}

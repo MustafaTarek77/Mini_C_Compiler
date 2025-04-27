@@ -45,8 +45,8 @@
 
 
     void end_scope(int line_number);
-    int symbol_exists(char *identifier);
-    int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_argument);
+    int get_symbol_declaration_line(char *identifier);
+    int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_parameter);
     int check_symbol(char *identifier, bool is_assigned, int line_number);
     void check_integer(int index, int value, int line_number);
     void check_float(int index, float value, int line_number);
@@ -97,7 +97,7 @@
 
 %left BITWISE_OR BITWISE_AND BITWISE_NOT LOGICAL_AND LOGICAL_OR
 %left GREATER_THAN LESS_THAN GREATER_EQUAL LESS_EQUAL EQUAL NOT_EQUAL
-%left ADD SUB MUL DIV MOD SHIFT_LEFT SHIFT_RIGHT POST_INC POST_DEC
+%left ADD SUB MUL DIV MOD SHIFT_LEFT SHIFT_RIGHT PRE_POST_INC PRE_POST_DEC
 
 %right POW ASSIGN LOGICAL_NOT
 
@@ -124,7 +124,7 @@ statement:    block
             | conditional_statement
             | function_declaration
             | BREAK SEMICOLON{jump_to_end_of_loop();}
-            | CONTINUE SEMICOLON {}
+            | CONTINUE SEMICOLON {fprintf(quadrupleFilePointer, "\tcontinue\n");}
             | return_statement SEMICOLON{fprintf(quadrupleFilePointer, "\treturn\n");}
             ;
 
@@ -251,14 +251,14 @@ declaration_statement:
     { 
         insertion_index = -1; 
     }
-    | data_type CONSTANT  
+    | CONSTANT data_type IDENTIFIER 
     { 
-        insertion_index = add_symbol($1, $2, "constant", yylineno, false); 
+        insertion_index = add_symbol($2, $3, "constant", yylineno, false); 
     }
     ASSIGN expression SEMICOLON 
     { 
         insertion_index = -1; 
-        write_identifier_quadruple($2, "pop"); 
+        write_identifier_quadruple($3, "pop"); 
     }
     ;
 
@@ -266,18 +266,15 @@ assignment_statement:
     IDENTIFIER ASSIGN 
     { 
         insertion_index = check_symbol($1, 1, yylineno); 
+        if(symbol_table[insertion_index].type == "constant"){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE); 
+        }
     } 
     expression SEMICOLON 
     { 
         write_identifier_quadruple($1, "pop"); 
     }
-    | CONSTANT ASSIGN 
-    { 
-        printf("Error at line: %d constants must not be reassigned\n", yylineno);
-        exit(EXIT_FAILURE); 
-        insertion_index = -1; 
-    } 
-    expression SEMICOLON 
     ;
 
 print_statement:
@@ -338,7 +335,7 @@ expression:
         write_identifier_quadruple($1, "push");
     }
     |
-    IDENTIFIER POST_INC
+    IDENTIFIER PRE_POST_INC
     { 
         int i = check_symbol($1, 0, yylineno);
         check_variable_type(i, yylineno);
@@ -348,7 +345,7 @@ expression:
         write_identifier_quadruple($1, "pop");
     }
     |
-    IDENTIFIER POST_DEC
+    IDENTIFIER PRE_POST_DEC
     { 
         int i = check_symbol($1, 0, yylineno);
         check_variable_type(i, yylineno);
@@ -356,6 +353,23 @@ expression:
         write_identifier_quadruple($1, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "post_dec");
         write_identifier_quadruple($1, "pop");
+    }
+    | PRE_POST_INC IDENTIFIER
+    { 
+        int i = check_symbol($2, 0, yylineno);
+        check_variable_type(i, yylineno);
+        $$ = create_node(symbol_table[i].ident_data_type);
+        write_identifier_quadruple($2, "push");
+        fprintf(quadrupleFilePointer, "\t%s\n", "pre_inc");
+    }
+    |
+    PRE_POST_DEC IDENTIFIER 
+    { 
+        int i = check_symbol($2, 0, yylineno);
+        check_variable_type(i, yylineno);
+        $$ = create_node(symbol_table[i].ident_data_type);
+        write_identifier_quadruple($2, "push");
+        fprintf(quadrupleFilePointer, "\t%s\n", "pre_dec");
     }
     | CONSTANT 
     { 
@@ -674,10 +688,10 @@ Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line)
 
 void end_scope(int line_number)
 {
-    // === Function Return Validations ===
+    // Function Return Validations
     if (curr_function_index != -1 && strcmp(symbol_table[curr_function_index].type, "function") == 0)
     {
-        // Case 1: Non-void function missing return
+        // Non-void function missing return
         if (!has_return && strcmp(symbol_table[curr_function_index].ident_data_type, "void") != 0)
         {
             printf("Error at line %d: Missing 'return' in Function\n", line_number);
@@ -685,21 +699,20 @@ void end_scope(int line_number)
             exit(EXIT_FAILURE);
         }
 
-        // Case 2: Void function has a return
+        // Void function has a return
         if (has_return && strcmp(symbol_table[curr_function_index].ident_data_type, "void") == 0)
         {
-            printf("Error at line %d: It's a void Function; can't have 'return'\n", line_number);
-            fprintf(error_output_file, "Error at line %d: It's a void Function; can't have 'return'\n", line_number);
+            printf("Error at line %d: It's a void Function; can't have 'return' with value\n", line_number);
+            fprintf(error_output_file, "Error at line %d: It's a void Function; can't have 'return' with value\n", line_number);
             exit(EXIT_FAILURE);
         }
     }
 
-    // === Reset Function Scope Flags ===
     insertion_index = -1;
     curr_function_index = -1;
     has_return = 0;
 
-    // === Mark Variables in This Scope as Ended ===
+    // Mark Variables in This Scope as Ended 
     for (int i = 0; i < symbol_table_index; i++)
     {
         if (symbol_table[i].scope_level == block_counter)
@@ -708,13 +721,13 @@ void end_scope(int line_number)
         }
     }
 
-    // === Exit the Current Scope Level ===
+    // Exit the Current Scope 
     block_counter--;
 }
 
-int symbol_exists(char *identifier)
+int get_symbol_declaration_line(char *identifier)
 {
-    // === Search for Identifier in Current Scope ===
+    // Search for Identifier in Current Scope 
     for (int i = 0; i < symbol_table_index; ++i)
     {
         if (strcmp(symbol_table[i].identifier, identifier) == 0 &&
@@ -727,63 +740,60 @@ int symbol_exists(char *identifier)
     return -1;
 }
 
-int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_argument)
+int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_param)
 {
-    // === Check for Redeclaration in Current Scope ===
-    int L = symbol_exists(identifier);
-    if (L != -1 && !is_function_argument)
+    // Check for Redeclaration in Current Scope 
+    int delaration_line = get_symbol_declaration_line(identifier);
+    if (delaration_line != -1 && !is_function_param)
     {
-        printf("Error at line %d: %s is already declared in this scope_level at line %d\n", line_number, identifier, L);
-        fprintf(error_output_file, "Error at line %d: %s is already declared in this scope_level at line %d\n", line_number, identifier, L);
+        printf("Error at line %d: %s is already declared in this scope_level at line %d\n", line_number, identifier, delaration_line);
+        fprintf(error_output_file, "Error at line %d: %s is already declared in this scope_level at line %d\n", line_number, identifier, delaration_line);
         exit(EXIT_FAILURE);
     }
 
-    // === Create New Symbol Entry ===
-    struct symbol newItem;
-    newItem.identifier = identifier;
-    newItem.ident_data_type = ident_data_type;
-    newItem.type = type;
-    newItem.declaration_line = line_number;
-    newItem.id = symbol_table_index;
+    struct symbol new_item = {0}; // zero all fields
+    new_item.identifier = identifier;
+    new_item.ident_data_type = ident_data_type;
+    new_item.type = type;
+    new_item.declaration_line = line_number;
+    new_item.id = symbol_table_index;
 
-    newItem.is_function_argument = is_function_argument;
-    newItem.is_assigned_to_func = false;
-    newItem.scope_ended = false;
-    newItem.is_initialized = false;
-    newItem.is_used = false;
+    new_item.is_function_parameter = is_function_param;
+    new_item.is_assigned_to_func = false;
+    new_item.scope_ended = false;
+    new_item.is_initialized = false;
+    new_item.is_used = false;
 
-    // === Determine Scope Level ===
-    if (is_function_argument || is_loop)
+    if (is_function_param || is_loop)
     {
-        newItem.scope_level = block_counter + 1;
+        new_item.scope_level = block_counter + 1;
     }
     else
     {
-        newItem.scope_level = block_counter;
+        new_item.scope_level = block_counter;
     }
 
-    // === Link Function Arguments if This is a Function ===
+    // Link Function parameters if This is a Function
     if (strcmp(type, "function") == 0)
     {
         int j = 0;
         for (int i = 0; i < symbol_table_index; i++)
         {
-            if (symbol_table[i].is_function_argument &&
+            if (symbol_table[i].is_function_parameter &&
                 symbol_table[i].scope_level == (block_counter + 1) &&
                 !symbol_table[i].is_assigned_to_func)
             {
-                newItem.function_arguments[j] = symbol_table[i].id;
+                new_item.function_arguments[j] = symbol_table[i].id;
                 symbol_table[i].is_assigned_to_func = true;
                 j++;
             }
         }
-        newItem.curr_function_arg_count = j;
+        new_item.curr_function_arg_count = j;
     }
 
-    // === Add to Symbol Table ===
-    symbol_table[symbol_table_index++] = newItem;
+    symbol_table[symbol_table_index++] = new_item;
 
-    return newItem.id;
+    return new_item.id;
 }
 
 
@@ -795,7 +805,7 @@ int check_symbol(char *identifier, bool is_assigned, int line_number)
         {
             if (!symbol_table[i].is_initialized &&
                 strcmp(symbol_table[i].type, "variable") == 0 &&
-                !symbol_table[i].is_function_argument &&
+                !symbol_table[i].is_function_parameter &&
                 !is_assigned)
             {
                 printf("Error at line %d: %s used before initialization\n", line_number, identifier);
@@ -890,20 +900,11 @@ void check_float(int index, float value, int line_number)
 }
 
 
-// Helper: Report type mismatch error and exit
 void report_type_error(int line_number, const char *identifier, const char *actual_type, const char *assigned_type)
 {
     printf("Error at line %d: %s type is '%s' but assigned '%s'\n", line_number, identifier, actual_type, assigned_type);
     fprintf(error_output_file, "Error at line %d: %s type is '%s' but assigned '%s'\n", line_number, identifier, actual_type, assigned_type);
     exit(EXIT_FAILURE);
-}
-
-// Helper: Common post-check update
-void finalize_assignment(int index)
-{
-    symbol_table[index].is_initialized = true;
-    if (is_argument == 1)
-        insertion_index = -1;
 }
 
 // Boolean check
@@ -991,7 +992,13 @@ void report_type_mismatch_error(int line_number, const char *identifier1, const 
 bool are_types_compatible(const char *type1, const char *type2)
 {
     if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
-        (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0))
+        (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0) ||
+        (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
+        (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0) ||
+        (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0) ||
+        (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0) ||
+        (strcmp(type1, "bool") == 0 && strcmp(type2, "float") == 0) ||
+        (strcmp(type1, "float") == 0 && strcmp(type2, "bool") == 0))
     {
         return true;
     }
@@ -1002,7 +1009,7 @@ bool are_types_compatible(const char *type1, const char *type2)
 // Helper: Check parameter type compatibility
 void check_argument_type_compatibility(int line_number, int insertion_index, const char *expected_type, const char *actual_type)
 {
-    if (are_types_compatible(expected_type, actual_type))
+    if (are_types_compatible(expected_type, actual_type)== false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, expected_type, symbol_table[called_function_index].identifier, actual_type);
     }
@@ -1022,7 +1029,7 @@ void check_variable_type(int symbol_index, int line_number)
     const char *expected_type = symbol_table[symbol_index].ident_data_type;
     const char *actual_type = symbol_table[insertion_index].ident_data_type;
 
-    if (strcmp(expected_type, actual_type) != 0)
+    if (are_types_compatible(expected_type,actual_type) == false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, actual_type, symbol_table[symbol_index].identifier, expected_type);
     }
@@ -1045,7 +1052,7 @@ void check_value_type(char *ident_data_type, int line_number)
     if (insertion_index == -1) return;
 
     const char *expected_type = symbol_table[insertion_index].ident_data_type;
-    if (strcmp(expected_type, ident_data_type) != 0 && are_types_compatible(expected_type, ident_data_type))
+    if (are_types_compatible(expected_type, ident_data_type)==false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, expected_type, symbol_table[called_function_index].identifier, ident_data_type);
     }
@@ -1086,12 +1093,12 @@ void write_symbol_table_to_file(const char *filename)
     FILE *fp = fopen(filename, "w");
     if (fp == NULL)
     {
-        perror("Error opening file");
+        perror("Error opening symbol table file");
         exit(EXIT_FAILURE);
     }
 
     fprintf(fp, "===============================================================================================================================\n");
-    fprintf(fp, " ID | Identifier     | Type     | Data Type | Line | Scope | FuncArg | Used | Init | AssignToFunc | ScopeEnded | Func Args\n");
+    fprintf(fp, " ID | Identifier     | Type     | Data Type | Line | Scope | Func_Param | Used | Init | AssignToFunc | ScopeEnded | Func Args\n");
     fprintf(fp, "===============================================================================================================================\n");
 
     for (int i = 0; i < symbol_table_index; i++)
@@ -1105,7 +1112,7 @@ void write_symbol_table_to_file(const char *filename)
                 node.ident_data_type ? node.ident_data_type : "(null)",
                 node.declaration_line, 
                 node.scope_level, 
-                node.is_function_argument, 
+                node.is_function_parameter, 
                 node.is_used, 
                 node.is_initialized,
                 node.is_assigned_to_func,
@@ -1139,7 +1146,7 @@ void write_unused_symbols_to_file(const char *filename)
     FILE *fp = fopen(filename, "w");
     if (fp == NULL)
     {
-        perror("Error opening unused variables file");
+        perror("Error opening unused symbols file");
         exit(EXIT_FAILURE);
     }
 
@@ -1153,7 +1160,7 @@ void write_unused_symbols_to_file(const char *filename)
                 fprintf(fp, "warning: function %s declared at line %d but never used\n", 
                         symbol_table[i].identifier, symbol_table[i].declaration_line);
             }
-            else if (symbol_table[i].is_function_argument == 1)
+            else if (symbol_table[i].is_function_parameter == 1)
             {
                 fprintf(fp, "warning: argument %s declared in function at line %d but never used\n", 
                         symbol_table[i].identifier, symbol_table[i].declaration_line);
@@ -1182,7 +1189,16 @@ int main(int argc, char *argv[])
     quadrupleFilePath = QUAD_FILE;
     quadrupleFilePointer = create_output_file(QUAD_FILE);
     error_output_file = fopen(ERROR_FILE, "w");
+    if (error_output_file == NULL) {
+        printf("failed opening error file\n");
+        return 1;
+    }
+
     yyin = fopen(argv[1], "r");
+    if(yyin==NULL){
+        printf("failed opening code file\n");
+        return 1;
+    }
     yyparse();
     write_unused_symbols_to_file(UNUSED_SYMBOLS_FILE);
     write_symbol_table_to_file(SYMBOL_TABLE_FILE);

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit immediately if any command fails
-# set -e
+set -e
 
 bison -d Parser.y
 flex Lexer.l

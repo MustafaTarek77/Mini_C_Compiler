@@ -111,7 +111,9 @@ extern int yydebug;
     CHAR_VALUE = 306,              /* CHAR_VALUE  */
     INTEGER_VALUE = 307,           /* INTEGER_VALUE  */
     FLOAT_VALUE = 308,             /* FLOAT_VALUE  */
-    BITWISE_NOT = 309              /* BITWISE_NOT  */
+    BITWISE_NOT = 309,             /* BITWISE_NOT  */
+    PRE_POST_INC = 310,            /* PRE_POST_INC  */
+    PRE_POST_DEC = 311             /* PRE_POST_DEC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -129,7 +131,7 @@ union YYSTYPE
  char char_type;
  struct Node *node;
 
-#line 133 "Parser.tab.h"
+#line 135 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

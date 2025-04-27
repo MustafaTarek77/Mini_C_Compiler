@@ -7,101 +7,64 @@ import threading
 class CompilerGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Compiler IDE")
+        self.root.title("Compiler")
         self.root.geometry("1200x800")
         
         # Create main frame
         main_frame = ttk.Frame(root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # Create top toolbar
+        # Toolbar
         toolbar = ttk.Frame(main_frame)
         toolbar.pack(fill=tk.X, pady=(0, 5))
-        
-        # Create toolbar buttons
         ttk.Button(toolbar, text="New", command=self.new_file).pack(side=tk.LEFT, padx=2)
         ttk.Button(toolbar, text="Open", command=self.open_file).pack(side=tk.LEFT, padx=2)
         ttk.Button(toolbar, text="Save As", command=self.save_as).pack(side=tk.LEFT, padx=2)
-        
-        # Create a green Compile button
         compile_button = tk.Button(toolbar, text="Compile", command=self.compile_code, 
                                   bg="green", fg="white", activebackground="dark green", 
                                   activeforeground="white")
         compile_button.pack(side=tk.LEFT, padx=2)
-        
-        # Create paned window for code and output
+
+        # Paned window for code and output
         paned = ttk.PanedWindow(main_frame, orient=tk.VERTICAL)
         paned.pack(fill=tk.BOTH, expand=True)
         
         # Frame for code editor with line numbers
         editor_frame = ttk.Frame(paned)
         paned.add(editor_frame, weight=70)
-        
-        # Create line numbers text widget
         self.line_numbers = tk.Text(editor_frame, width=4, padx=3, takefocus=0,
                                    border=0, background='#f0f0f0', state='disabled')
         self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
-        
-        # Create code editor
         self.code_editor = scrolledtext.ScrolledText(editor_frame, wrap=tk.NONE, undo=True)
         self.code_editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # Connect scrollbar of code_editor with line_numbers
         self.code_editor.bind('<KeyRelease>', self.update_line_numbers)
         self.code_editor.bind('<MouseWheel>', self.update_line_numbers)
-        
-        # Output frame
+
+        # One output area below
         output_frame = ttk.Frame(paned)
         paned.add(output_frame, weight=30)
-        
-        # Create output notebook with tabs
-        self.output_notebook = ttk.Notebook(output_frame)
-        self.output_notebook.pack(fill=tk.BOTH, expand=True)
-        
-        # Create console output tab
-        console_frame = ttk.Frame(self.output_notebook)
-        self.output_notebook.add(console_frame, text='Console')
-        
-        self.console_output = scrolledtext.ScrolledText(console_frame, wrap=tk.WORD, height=10)
-        self.console_output.pack(fill=tk.BOTH, expand=True)
-        self.console_output.config(state=tk.DISABLED)
-        
-        # Create errors/warnings tab
-        error_frame = ttk.Frame(self.output_notebook)
-        self.output_notebook.add(error_frame, text='Errors/Warnings')
-        
-        self.error_output = scrolledtext.ScrolledText(error_frame, wrap=tk.WORD, height=10)
+        self.error_output = scrolledtext.ScrolledText(output_frame, wrap=tk.WORD, height=10)
         self.error_output.pack(fill=tk.BOTH, expand=True)
         self.error_output.config(state=tk.DISABLED)
-        
+
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
-        
-        # Current file path
         self.current_file = None
-        
-        # Initialize line numbers
         self.update_line_numbers()
     
     def update_line_numbers(self, event=None):
-        """Update line numbers in the editor"""
         self.line_numbers.config(state=tk.NORMAL)
         self.line_numbers.delete('1.0', tk.END)
-        
         line_count = self.code_editor.get('1.0', tk.END).count('\n')
         for line_num in range(1, line_count + 1):
             self.line_numbers.insert(tk.END, f"{line_num}\n")
-        
         self.line_numbers.config(state=tk.DISABLED)
-        
-        # Adjust view of line numbers to match code editor
         self.line_numbers.yview_moveto(self.code_editor.yview()[0])
     
     def new_file(self):
-        """Create a new file"""
         if messagebox.askyesno("New File", "Do you want to create a new file? Unsaved changes will be lost."):
             self.code_editor.delete(1.0, tk.END)
             self.current_file = None
@@ -109,7 +72,6 @@ class CompilerGUI:
             self.update_line_numbers()
     
     def open_file(self):
-        """Open a file for editing"""
         file_path = filedialog.askopenfilename(
             filetypes=[("Text files", "*.txt"), ("C files", "*.c"), ("All files", "*.*")]
         )
@@ -125,7 +87,6 @@ class CompilerGUI:
                 messagebox.showerror("Error", f"Failed to open file: {e}")
     
     def save_as(self):
-        """Save as a new file"""
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("C files", "*.c"), ("All files", "*.*")]
@@ -140,68 +101,32 @@ class CompilerGUI:
                 messagebox.showerror("Error", f"Failed to save file: {e}")
     
     def compile_code(self):
-        """Compile the current code"""
-        # First save the code to code.txt
         try:
             with open("code.txt", 'w') as file:
                 file.write(self.code_editor.get(1.0, tk.END))
-            
             self.status_var.set("Compiling...")
-            
-            # Run compilation in a separate thread to avoid freezing UI
             threading.Thread(target=self._run_compilation).start()
-            
         except Exception as e:
             messagebox.showerror("Error", f"Failed to compile: {e}")
     
     def _run_compilation(self):
-        """Run the compilation process in a thread"""
         try:
-            # Clear previous outputs
-            self.root.after(0, self._clear_outputs)
-            
-            # Run the build script
+            self.root.after(0, self._clear_output)
             process = subprocess.Popen(['bash', 'build.sh'], 
                                       stdout=subprocess.PIPE, 
                                       stderr=subprocess.PIPE,
                                       text=True)
             stdout, stderr = process.communicate()
-            
-            # Update console output
-            self.root.after(0, lambda: self._update_console(stdout))
-            
-            # Check if there were any stderr messages and add them to console
-            if stderr:
-                self.root.after(0, lambda: self._update_console("\nErrors during compilation:\n" + stderr))
-            
-            # Check if compilation was successful
-            if process.returncode == 0:
-                self.root.after(0, lambda: self._check_compilation_results())
-            else:
-                self.root.after(0, lambda: self._update_status("Compilation failed"))
-                
+            self.root.after(0, lambda: self._check_compilation_results())
         except Exception as e:
             self.root.after(0, lambda: messagebox.showerror("Error", f"Compilation error: {e}"))
     
-    def _clear_outputs(self):
-        """Clear the output areas"""
-        self.console_output.config(state=tk.NORMAL)
-        self.console_output.delete(1.0, tk.END)
-        self.console_output.config(state=tk.DISABLED)
-        
+    def _clear_output(self):
         self.error_output.config(state=tk.NORMAL)
         self.error_output.delete(1.0, tk.END)
         self.error_output.config(state=tk.DISABLED)
     
-    def _update_console(self, text):
-        """Update the console output"""
-        self.console_output.config(state=tk.NORMAL)
-        self.console_output.insert(tk.END, text)
-        self.console_output.see(tk.END)
-        self.console_output.config(state=tk.DISABLED)
-    
     def _update_error_output(self, text, tag=None):
-        """Update the error output"""
         self.error_output.config(state=tk.NORMAL)
         if tag:
             self.error_output.insert(tk.END, text, tag)
@@ -211,19 +136,17 @@ class CompilerGUI:
         self.error_output.config(state=tk.DISABLED)
     
     def _update_status(self, text):
-        """Update the status bar"""
         self.status_var.set(text)
     
     def _check_compilation_results(self):
-        """Check for errors and warnings in output files"""
-        errors_exist = False
-        
-        # Configure tags for error and warning highlighting
+        # Configure tags for highlighting
         self.error_output.tag_configure("error", foreground="red")
         self.error_output.tag_configure("warning", foreground="orange")
-        
-        # Check errors file
+        errors_exist = False
+
         errors_file = "./output/errors.txt"
+        warnings_file = "./output/warnings.txt"
+
         if os.path.exists(errors_file):
             with open(errors_file, 'r') as file:
                 error_content = file.read().strip()
@@ -231,24 +154,19 @@ class CompilerGUI:
                     errors_exist = True
                     self._update_error_output("ERRORS:\n", "error")
                     self._update_error_output(error_content + "\n\n")
-        
-        # Only check warnings if there are no errors
-        if not errors_exist:
-            warnings_file = "./output/warnings.txt"
-            if os.path.exists(warnings_file):
-                with open(warnings_file, 'r') as file:
-                    warning_content = file.read().strip()
-                    if warning_content:
-                        self._update_error_output("WARNINGS:\n", "warning")
-                        self._update_error_output(warning_content + "\n\n")
-            
+        if not errors_exist and os.path.exists(warnings_file):
+            with open(warnings_file, 'r') as file:
+                warning_content = file.read().strip()
+                if warning_content:
+                    self._update_error_output("WARNINGS:\n", "warning")
+                    self._update_error_output(warning_content + "\n\n")
+        if not errors_exist and (not os.path.exists(warnings_file) or not open(warnings_file).read().strip()):
+            self._update_error_output("No errors found. Compilation successful!\n")
             self._update_status("Compilation successful")
-            # Only show "no errors" message if there are no warnings displayed
-            if not os.path.exists(warnings_file) or not open(warnings_file, 'r').read().strip():
-                self._update_error_output("No errors found. Compilation successful!\n")
-        else:
+        elif errors_exist:
             self._update_status("Compilation failed")
-            self.output_notebook.select(1)  # Show errors tab
+        else:
+            self._update_status("Compilation successful")
 
 if __name__ == "__main__":
     root = tk.Tk()

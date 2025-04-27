@@ -2,6 +2,7 @@ int add(int a, int b) {
     return a + b;
 }
 
+
 void printAll() {
 }
 
@@ -13,6 +14,10 @@ void mainFunc() {
     string str = "test 123";
     bool flag = true;
     int CONST_A = 10;
+    x++;        // Post increment
+    x--;        // Post decrement
+    ++x;        // Pre increment
+    --x;        // Pre decrement
     int z = add(x, CONST_A);
 
     print("Sum: ");
@@ -69,16 +74,3 @@ void mainFunc() {
     print("End of mainFunc");
     return;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

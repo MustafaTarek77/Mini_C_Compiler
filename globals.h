@@ -3,14 +3,14 @@
 #define UNUSED_SYMBOLS_FILE "./output/warnings.txt"
 #define SYMBOL_TABLE_FILE "./output/symbol_table.txt"
 
-#define MAX_SYMBOLS 1000
-#define MAX_FUNC_ARGS 50
-#define MAX_LABELS 100
+#define MAX_SYMBOLS 2000
+#define MAX_FUNC_ARGS 100
+#define MAX_LABELS 500
 
 typedef struct symbol
 {
     int id, scope_level, declaration_line;
-    bool is_function_argument, is_used, is_initialized, is_assigned_to_func, scope_ended;
+    bool is_function_parameter, is_used, is_initialized, is_assigned_to_func, scope_ended;
     char *identifier, *type, *ident_data_type;
     int function_arguments[MAX_FUNC_ARGS];
     int curr_function_arg_count;
