@@ -2419,12 +2419,22 @@ void yyfree (void * ptr )
 
 
 void log_token(const char *token) {
-    FILE *log_file = fopen("./output/tokens.log", "a");
+    static int first_call = 1; // Static means it keeps its value between calls
+
+    FILE *log_file;
+
+    if (first_call) {
+        log_file = fopen("./output/tokens.log", "w"); // First call: overwrite
+        first_call = 0; // Next calls will append
+    } else {
+        log_file = fopen("./output/tokens.log", "a"); // Append mode
+    }
+
     if (log_file) {
         fprintf(log_file, "Detected Token: %s\n", token);
         fclose(log_file);
     } else {
-        fprintf(stderr, "Error opening log file.\n");
+        fprintf(stderr, "Error opening log file. Make sure the './output/' directory exists.\n");
     }
 }
 

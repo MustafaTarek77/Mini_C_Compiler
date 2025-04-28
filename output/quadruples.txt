@@ -1,142 +1,230 @@
-add:
-	pop b
+	push 5
 	pop a
+	push 2.500000
+	pop c
+	push 'z'
+	pop d
+	push "hello"
+	pop e
+	push 1
+	pop f
+	push 10
+	pop ci
+	push 1.250000
+	pop cf
+	push 'x'
+	pop cc
+	push "constant"
+	pop cs
+	push 0
+	pop cb
+	push 10
+	pop b
+	push a
+	push 3.500000
+	push a
+	pre_inc
+	mul
+	push 2.000000
+	div
+	add
+	pop c
+	push a
+	post_inc
+	push b
+	pre_inc
+	push c
+	post_dec
+	push c
+	pre_dec
+	push a
+	pre_inc
+	push b
+	pre_dec
+	push 'a'
+	pop d
+	push a
+	push b
+	push 3
+	mul
+	add
+	push c
+	push 2
+	div
+	push 4
+	mod
+	sub
+	pop x
+	push 2.000000
+	push c
 	push a
 	push b
 	add
-	return
-	end add
-printAll:
-	end printAll
-mainFunc:
-	push 100
-	pop x
-	push 2.500000
+	mul
+	add
 	pop y
-	push 'A'
-	pop ch
-	push "test 123"
-	pop str
-	push 1
-	pop flag
-	push 10
-	pop CONST_A
-	push x
-	post_inc
-	pop x
-	push x
-	post_dec
-	pop x
-	push x
-	pre_inc
-	push x
-	pre_dec
-	push x
-	push CONST_A
-	call add
-	pop z
-	push "Sum: "
-	print
-	push z
-	print
-	push flag
-	push x
-	push 90
-	greater_than
+	push f
+	push a
+	push b
+	less_than
 	logical_and
+	push b
+	push 1
+	equal
+	logical_or
+	pop flag
+	push a
+	print
+	push c
+	print
+	push "test"
+	print
+	push a
+	push b
+	greater_than
 	jf false_label_1
-	push "Condition1 met"
+	push "a is greater"
 	print
 	jmp end_if_1
 false_label_1:
-	push y
-	push 5.000000
-	less_than
-	jf false_label_2
-	push "Condition2 met"
-	print
-	jmp end_if_1
-false_label_2:
-	push "No conditions met"
+	push "b is greater or equal"
 	print
 end_if_1:
-	push 0
-	pop count
-start_while_1:
-	push count
-	push 3
+	push b
+	push 10
+	equal
+	jf false_label_2
+	push "b is ten"
+	print
+	jmp end_if_2
+false_label_2:
+	push b
+	push 10
 	less_than
 	jf false_label_3
-	push count
+	push "b less than ten"
 	print
-	push count
-	post_inc
-	pop count
-	jmp start_while_1
+	jmp end_if_2
 false_label_3:
-start_do_while_2:
-	push "In do-while"
+	push "b is more than ten"
 	print
-	push count
-	post_dec
-	pop count
-	push count
+end_if_2:
+start_while_1:
+	push a
 	push 0
 	greater_than
 	jf false_label_4
-	jmp start_do_while_2
+	push a
+	print
+	push a
+	post_dec
+	push a
+	push 2
+	equal
+	jf false_label_5
+	jmp end_loop_0
+	jmp end_if_3
+false_label_5:
+end_if_3:
+	push a
+	push 1
+	equal
+	jf false_label_6
+	continue
+	jmp end_if_4
+false_label_6:
+end_if_4:
+	jmp start_while_1
 false_label_4:
+start_do_while_2:
+	push b
+	post_dec
+	push b
+	print
+	push b
+	push 0
+	greater_than
+	jf false_label_7
+	jmp start_do_while_2
+false_label_7:
 	push 0
 	pop i
 start_for_3:
 	push i
-	push 5
+	push 10
 	less_than
-	jf false_label_5
+	jf false_label_8
 	push i
 	post_inc
-	pop i
-	push i
-	print
 	push i
 	push 2
-	equal
-	jf false_label_6
-	continue
-	jmp end_if_2
-false_label_6:
-end_if_2:
-	push i
-	push 4
-	equal
-	jf false_label_7
-	jmp end_loop_0
-	jmp end_if_3
-false_label_7:
-end_if_3:
-	jmp start_for_3
-false_label_5:
-	push 100
-	push x
-	equal
-	jf false_label_8
-	push "Case 100"
-	print
-	jmp end_loop_4
-false_label_8:
-	push 99
-	push x
+	mod
+	push 0
 	equal
 	jf false_label_9
-	push "Case 99"
-	print
-	jmp end_loop_4
+	continue
+	jmp end_if_5
 false_label_9:
-	push "Default Case"
+end_if_5:
+	push i
+	push 7
+	equal
+	jf false_label_10
+	jmp end_loop_0
+	jmp end_if_6
+false_label_10:
+end_if_6:
+	push i
 	print
-	jmp end_loop_4
-end_loop_4:
-	push "End of mainFunc"
+	jmp start_for_3
+false_label_8:
+	push a
+	equal
+	jf false_label_11
+	push "One"
 	print
+	jmp end_loop_7
+false_label_11:
+	push a
+	equal
+	jf false_label_12
+	push "Two"
+	print
+	jmp end_loop_7
+false_label_12:
+	push "Other"
+	print
+end_loop_7:
+add:
+	pop y
+	pop x
+	push x
+	push y
+	add
 	return
-	end mainFunc
+	end add
+product:
+	pop b
+	pop a
+	push a
+	push b
+	mul
+	return
+	end product
+say_hello:
+	push "hello"
+	print
+	end say_hello
+	push a
+	push b
+	call add
+	pop result
+	push 3.140000
+	push 2
+	call product
+	pop prod
+	call say_hello
+never_called:
+	push "I am never called"
+	print
+	end never_called

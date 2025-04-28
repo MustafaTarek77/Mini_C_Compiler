@@ -1,80 +1,153 @@
-int add(int a, int b) {
-    return a + b;
+// Variable declarations (all types)
+int a = 5;
+int b;
+float c = 2.5;
+char d = 'z';
+string e = "hello";
+bool f = true;
+
+// Constant declarations
+const int ci = 10;
+const float cf = 1.25;
+const char cc = 'x';
+const string cs = "constant";
+const bool cb = false;
+
+// Error: constant must be initialized
+// const int err_const;  
+
+// Error: redeclaration in same scope
+// int a;
+
+// Assignment (after declaration)
+b = 10;
+c = a + 3.5 * (b - 2) / 2;
+
+// Error: assign to constant
+// ci = 7;
+
+// Pre/post increment/decrement
+a++;
+++b;
+c--;
+--c;
+++a;
+--b;
+d = 'a'; // char assign
+
+// Expressions
+int x = a + b * 3 - (c / 2) % 4;
+float y = 2.0 + c * (a + b);
+bool flag = f && (a < b) || (b == 10);
+
+// Errors: type mismatches
+// int bad1 = "oops";
+// float bad2 = 'b' + 4;
+
+// Print
+print(a);
+print(c);
+print("test");
+
+// Control flow: if/else
+if (a > b) {
+    print("a is greater");
+} else {
+    print("b is greater or equal");
 }
 
-
-void printAll() {
+// Nested if-else with error inside
+if (b == 10) {
+    print("b is ten");
+    // Error: use before initialization
+    // int someVar;
+    // print(someVar); // not initialized
+} else if (b < 10) {
+    print("b less than ten");
+} else {
+    print("b is more than ten");
 }
 
-void mainFunc() {
-    // Test variable and constant declarations, arithmetic, function call
-    int x = 100;
-    float y = 2.5;
-    char ch = 'A';
-    string str = "test 123";
-    bool flag = true;
-    int CONST_A = 10;
-    x++;        // Post increment
-    x--;        // Post decrement
-    int z = add(x, CONST_A);
-
-    print("Sum: ");
-    print(z);
-
-    if (flag && x > 90) {
-        print("Condition1 met");
-    } else if (y < 5.0) {
-        print("Condition2 met");
-    } else {
-        print("No conditions met");
-    }
-
-    int count = 0;
-    while (count < 3) {
-        print(count);
-        count++;
-    }
-
-    do {
-        print("In do-while");
-        count--;
-    } while (count > 0);
-
-    int i;
-    for (i = 0; i < 5; i++;) {
-        print(i);
-        if (i == 2) {
-            continue;
-        }
-        if (i == 4) {
-            break;
-        }
-    }
-
-    switch (x) {
-        case 100:
-            {
-            print("Case 100");
-            break;
-            }
-        case 99:
-            {
-            print("Case 99");
-            break;
-            }
-        default:
-            {
-            print("Default Case");
-            break;
-            }
-    }
-
-    print("End of mainFunc");
-    return;
+// While loop
+while (a > 0) {
+    print(a);
+    a--;
+    if (a == 2) {break;}
+    if (a == 1) {continue;}
 }
 
+// Do-while loop
+do {
+    b--;
+    print(b);
+} while (b > 0);
 
+// For loop with break/continue
+for (int i = 0; i < 10; i++;) {
+    if (i % 2 == 0) {continue;}
+    if (i == 7) {break;}
+    print(i);
+}
 
+// Switch statement
+switch (a) {
+    case 1:
+    {
+        print("One");
+        break;
+    }
+    case 2:
+    {
+        print("Two");
+        break;
+    }
+    default:
+    {
+        print("Other");
+    }
+}
 
+// Error: undeclared identifier
+// print(not_declared);
 
+// Function declaration and calls
+int add(int x, int y) {
+    return x + y;
+}
+
+float product(float a, int b) {
+    return a * b;
+}
+
+// Void function
+void say_hello() {
+    print("hello");
+}
+
+// Error: missing return in non-void
+// int error_func() {
+//     print("no return");
+// }
+
+// Error: return value in void function
+// void error_func2() {
+//     return 5;
+// }
+
+// Function calls
+int result = add(a, b);
+float prod = product(3.14, 2);
+say_hello();
+
+// Error: wrong argument count/type
+// int wrong_call = add(a);      // too few arguments
+// float prod2 = product(2, "str"); // bad argument type
+
+// Unused variable (should trigger warning)
+int unused_var;
+
+// Unused function (should trigger warning)
+void never_called() {
+    print("I am never called");
+}
 

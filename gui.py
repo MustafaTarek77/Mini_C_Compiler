@@ -139,7 +139,7 @@ class CompilerGUI:
         self.status_var.set(text)
     
     def _check_compilation_results(self):
-        # Configure tags for highlighting
+        
         self.error_output.tag_configure("error", foreground="red")
         self.error_output.tag_configure("warning", foreground="orange")
         errors_exist = False

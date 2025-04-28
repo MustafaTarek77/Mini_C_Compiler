@@ -12,38 +12,26 @@
     void yyerror(char* );
     extern int yylineno;  
 
-    symbol symbol_table[MAX_SYMBOLS];
+    FILE *error_output_file = NULL;
 
+    symbol symbol_table[MAX_SYMBOLS];
     int block_counter = 0;
     int symbol_table_index = 0;
-
     int curr_function_index = 0;
     int curr_function_arg_count = 0;
     int called_function_index = 0;
     int is_argument = 0;
     int is_loop = 0;
     int has_return = 0;
-
+    int is_plus = 0;
     int insertion_index = -1;
 
-    FILE *error_output_file = NULL;
-
-    // Checks if memory allocation was successful
+    
     void check_mem_alloc(Node *node);
-
-    // Creates a new AST node with the given type
     Node *create_node(char *type);
-
-    // Validates types for arithmetic operations (unary or binary)
     Node *check_valid_types_arithmetic(Node *operand1, Node *operand2, int curr_line);
-
-    // Validates types for boolean operations (unary or binary)
     Node *check_valid_types_bool(Node *operand1, Node *operand2, int curr_line);
-
-    // Validates types for bitwise operations (binary only)
     Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line);
-
-
     void end_scope(int line_number);
     int get_symbol_declaration_line(char *identifier);
     int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_parameter);
@@ -55,23 +43,10 @@
     void check_char(int index, char *value, int line_number);
     void check_variable_type(int i, int line_number);
     void check_value_type(char *ident_data_type, int line_number);
-    // Checks if the number of arguments in a function call matches the declaration
     void check_function_argument_count(int i, int line_number);
-
-    // Pops function arguments from the stack and generates corresponding quadruples
     void pop_function_parameters(int index);
-
-    // Displays the symbol table to a given file
     void write_symbol_table_to_file(const char *filename);
-
-    // Logs all unused variables (functions, arguments, identifiers) to a file
     void write_unused_symbols_to_file(const char *filename);
-
-    // Removes all output files
-    int delete_output_files();
-
-
-
 
 %}
 
@@ -95,11 +70,17 @@
 %token SEMICOLON COMMA MOD ADD SUB MUL DIV POW SHIFT_LEFT SHIFT_RIGHT GREATER_THAN LESS_THAN ASSIGN GREATER_EQUAL LESS_EQUAL POST_INC POST_DEC
 %token CONSTANT IDENTIFIER STRING_VALUE CHAR_VALUE INTEGER_VALUE FLOAT_VALUE
 
-%left BITWISE_OR BITWISE_AND BITWISE_NOT LOGICAL_AND LOGICAL_OR
-%left GREATER_THAN LESS_THAN GREATER_EQUAL LESS_EQUAL EQUAL NOT_EQUAL
-%left ADD SUB MUL DIV MOD SHIFT_LEFT SHIFT_RIGHT PRE_POST_INC PRE_POST_DEC
-
-%right POW ASSIGN LOGICAL_NOT
+%left LOGICAL_OR
+%left LOGICAL_AND
+%left BITWISE_OR
+%left BITWISE_AND
+%left EQUAL NOT_EQUAL
+%left LESS_THAN GREATER_THAN LESS_EQUAL GREATER_EQUAL
+%left SHIFT_LEFT SHIFT_RIGHT
+%left ADD SUB
+%left MUL DIV MOD
+%right PRE_POST_INC PRE_POST_DEC LOGICAL_NOT BITWISE_NOT
+%right POW
 
 %type <string_type> CONSTANT IDENTIFIER data_type STRING_VALUE CHAR_VALUE
 %type <float_type> FLOAT_VALUE
@@ -203,7 +184,18 @@ default_statement:
     ;
 
 case_statement:
-    CASE expression 
+    CASE INTEGER_VALUE 
+    { 
+        push_case_value();
+        fprintf(quadrupleFilePointer, "\t%s\n", "equal");
+        jump_if_false(++false_label_counter); 
+    }
+    ':' block 
+    { 
+        pop_last_false_label(); 
+    }
+    case_statement
+    | CASE CHAR_VALUE 
     { 
         push_case_value();
         fprintf(quadrupleFilePointer, "\t%s\n", "equal");
@@ -266,9 +258,10 @@ assignment_statement:
     IDENTIFIER ASSIGN 
     { 
         insertion_index = check_symbol($1, 1, yylineno); 
-        if(symbol_table[insertion_index].type == "constant"){
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
             printf("Error at line: %d constants must not be reassigned\n", yylineno);
-            exit(EXIT_FAILURE); 
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
         }
     } 
     expression SEMICOLON 
@@ -342,7 +335,6 @@ expression:
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($1, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "post_inc");
-        write_identifier_quadruple($1, "pop");
     }
     |
     IDENTIFIER PRE_POST_DEC
@@ -352,7 +344,6 @@ expression:
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($1, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "post_dec");
-        write_identifier_quadruple($1, "pop");
     }
     | PRE_POST_INC IDENTIFIER
     { 
@@ -421,8 +412,10 @@ expression:
     
     | expression ADD expression
     { 
+        is_plus = 1;
         $$ = check_valid_types_arithmetic($1, $3, yylineno);
         fprintf(quadrupleFilePointer, "\t%s\n", "add");
+        is_plus=0;
     }
     | expression SUB expression
     { 
@@ -586,8 +579,6 @@ parameters_list:
     }
     | 
     ;
-
-
 %%
 
 void check_mem_alloc(Node *node)
@@ -617,11 +608,22 @@ Node *check_valid_types_arithmetic(Node *operand1, Node *operand2, int curr_line
         if (strcmp(operand1->type, "int") != 0 && strcmp(operand1->type, "float") != 0)
         {
             printf("Error at line %d: Invalid type for unary operator (int and float types are valid only)\n", curr_line);
+            fprintf(error_output_file, "Error at line %d: Invalid type for unary operator (int and float types are valid only)\n", curr_line);
             exit(EXIT_FAILURE);
         }
     }
     else
     {
+        if(is_plus==1){
+
+            if(strcmp(operand1->type, "void") == 0 || strcmp(operand2->type, "void") == 0) {
+                printf("Error at line %d: Invalid types for arithmetic operator (int and float types are valid only)\n", curr_line);
+                fprintf(error_output_file, "Error at line %d: Invalid types for arithmetic operator (int and float types are valid only)\n", curr_line);
+                exit(EXIT_FAILURE);
+            }
+
+        }
+        else {
         if (strcmp(operand1->type, "string") == 0 ||
             strcmp(operand2->type, "string") == 0 ||
             strcmp(operand1->type, "char") == 0 ||
@@ -630,7 +632,9 @@ Node *check_valid_types_arithmetic(Node *operand1, Node *operand2, int curr_line
             strcmp(operand2->type, "void") == 0)
         {
             printf("Error at line %d: Invalid types for arithmetic operator (int and float types are valid only)\n", curr_line);
+            fprintf(error_output_file, "Error at line %d: Invalid types for arithmetic operator (int and float types are valid only)\n", curr_line);
             exit(EXIT_FAILURE);
+        }
         }
     }
     
@@ -649,6 +653,7 @@ Node *check_valid_types_bool(Node *operand1, Node *operand2, int curr_line)
         if (strcmp(operand1->type, "string") == 0 || strcmp(operand1->type, "char") == 0 || strcmp(operand1->type, "void") == 0)
         {
             printf("Error at line %d: Invalid type for negation operator (!)\n", curr_line);
+            fprintf(error_output_file, "Error at line %d: Invalid type for negation operator (!)\n", curr_line);
             exit(EXIT_FAILURE);
         }
     }
@@ -663,6 +668,7 @@ Node *check_valid_types_bool(Node *operand1, Node *operand2, int curr_line)
             strcmp(operand2->type, "void") == 0)
         {
             printf("Error at line %d: Invalid types for boolean operator\n", curr_line);
+            fprintf(error_output_file, "Error at line %d: Invalid types for boolean operator\n", curr_line);
             exit(EXIT_FAILURE);
         }
     }
@@ -679,6 +685,7 @@ Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line)
     if (strcmp(operand1->type, "int") != 0 || strcmp(operand2->type, "int") != 0)
     {
         printf("Error at line %d: Invalid types for bitwise operator\n", curr_line);
+        fprintf(error_output_file, "Error at line %d: Invalid types for bitwise operator\n", curr_line);
         exit(EXIT_FAILURE);
     }
 
@@ -699,7 +706,7 @@ void end_scope(int line_number)
             exit(EXIT_FAILURE);
         }
 
-        // Void function has a return
+        // Void function has a return with value
         if (has_return && strcmp(symbol_table[curr_function_index].ident_data_type, "void") == 0)
         {
             printf("Error at line %d: It's a void Function; can't have 'return' with value\n", line_number);
@@ -773,7 +780,6 @@ int add_symbol(char *ident_data_type, char *identifier, char *type, int line_num
         new_item.scope_level = block_counter;
     }
 
-    // Link Function parameters if This is a Function
     if (strcmp(type, "function") == 0)
     {
         int j = 0;
@@ -907,7 +913,6 @@ void report_type_error(int line_number, const char *identifier, const char *actu
     exit(EXIT_FAILURE);
 }
 
-// Boolean check
 void check_bool(int index, bool value, int line_number)
 {
     if (index == -1)
@@ -931,7 +936,6 @@ void check_bool(int index, bool value, int line_number)
         insertion_index = -1;
 }
 
-// String check
 void check_string(int index, char *value, int line_number)
 {
     if (index == -1)
@@ -942,7 +946,7 @@ void check_string(int index, char *value, int line_number)
 
     const char *type = symbol_table[index].ident_data_type;
 
-    if ((strcmp(type, "string") == 0 && !symbol_table[index].scope_ended) || is_argument)
+    if ((strcmp(type, "string") == 0) && (!symbol_table[index].scope_ended) || is_argument)
     {
         fprintf(quadrupleFilePointer, "\tpush %s\n", value);
     }
@@ -956,7 +960,6 @@ void check_string(int index, char *value, int line_number)
         insertion_index = -1;
 }
 
-// Char check
 void check_char(int index, char *value, int line_number)
 {
     if (index == -1)
@@ -967,7 +970,7 @@ void check_char(int index, char *value, int line_number)
 
     const char *type = symbol_table[index].ident_data_type;
 
-    if ((strcmp(type, "char") == 0 && !symbol_table[index].scope_ended) || is_argument)
+    if ((strcmp(type, "char") == 0) && (!symbol_table[index].scope_ended) || is_argument)
     {
         fprintf(quadrupleFilePointer, "\tpush %s\n", value);
     }
@@ -981,35 +984,47 @@ void check_char(int index, char *value, int line_number)
         insertion_index = -1;
 }
 
-// Helper: Report function errors with type mismatch
 void report_type_mismatch_error(int line_number, const char *identifier1, const char *type1, const char *identifier2, const char *type2)
 {
     printf("Error at line %d: %s is %s variable but found %s\n", line_number, identifier1, type1, type2);
-    fprintf(error_output_file, "Error at line %d: %s is %s variable but found %s\n", line_number, identifier1, type1, type2);
+    fprintf(error_output_file, "Error at line %d: %s is %s variable but found %s %s\n", line_number, identifier1, type1,identifier2, type2);
     exit(EXIT_FAILURE);
 }
 
-bool are_types_compatible(const char *type1, const char *type2)
+bool are_types_compatible(const char *type1, const char *type2,int from_func)
 {
-    if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
-        (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0) ||
-        (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
-        (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0) ||
-        (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0) ||
-        (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0) ||
-        (strcmp(type1, "bool") == 0 && strcmp(type2, "float") == 0) ||
-        (strcmp(type1, "float") == 0 && strcmp(type2, "bool") == 0))
-    {
-        return true;
+    if(from_func==1){
+        if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
+            (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0)||
+            (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0)||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0)||
+            (strcmp(type1, "float") == 0 && strcmp(type2, "bool") == 0) ||
+            (strcmp(type1, "bool") == 0 && strcmp(type2, "float") == 0))
+        {
+            return true;
+        }
+    }
+    else {
+        if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
+            (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0) ||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
+            (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0)||
+            (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0)||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0)||
+            (strcmp(type1, "float") == 0 && strcmp(type2, "bool") == 0) ||
+            (strcmp(type1, "bool") == 0 && strcmp(type2, "float") == 0))
+        {
+            return true;
+        }
     }
     return strcmp(type1, type2) == 0;
 }
 
 
-// Helper: Check parameter type compatibility
 void check_argument_type_compatibility(int line_number, int insertion_index, const char *expected_type, const char *actual_type)
 {
-    if (are_types_compatible(expected_type, actual_type)== false)
+    if (are_types_compatible(expected_type, actual_type,1)== false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, expected_type, symbol_table[called_function_index].identifier, actual_type);
     }
@@ -1029,7 +1044,7 @@ void check_variable_type(int symbol_index, int line_number)
     const char *expected_type = symbol_table[symbol_index].ident_data_type;
     const char *actual_type = symbol_table[insertion_index].ident_data_type;
 
-    if (are_types_compatible(expected_type,actual_type) == false)
+    if (are_types_compatible(expected_type,actual_type,0) == false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, actual_type, symbol_table[symbol_index].identifier, expected_type);
     }
@@ -1039,7 +1054,6 @@ void check_variable_type(int symbol_index, int line_number)
     }
 }
 
-// Main check for parameter type assignment
 void check_value_type(char *ident_data_type, int line_number)
 {
     if (is_argument == 1)
@@ -1052,13 +1066,12 @@ void check_value_type(char *ident_data_type, int line_number)
     if (insertion_index == -1) return;
 
     const char *expected_type = symbol_table[insertion_index].ident_data_type;
-    if (are_types_compatible(expected_type, ident_data_type)==false)
+    if (are_types_compatible(expected_type, ident_data_type,1)==false)
     {
         report_type_mismatch_error(line_number, symbol_table[insertion_index].identifier, expected_type, symbol_table[called_function_index].identifier, ident_data_type);
     }
 }
 
-// Function argument count check
 void check_function_argument_count(int i, int line_number)
 {
     int expected_arg_count = symbol_table[i].curr_function_arg_count;
@@ -1077,7 +1090,6 @@ void check_function_argument_count(int i, int line_number)
     }
 }
 
-// Pop function arguments
 void pop_function_parameters(int index)
 {
     for (int i = symbol_table[index].curr_function_arg_count - 1; i >= 0; --i)
@@ -1150,7 +1162,6 @@ void write_unused_symbols_to_file(const char *filename)
         exit(EXIT_FAILURE);
     }
 
-    // Check each symbol and write warnings for unused symbols
     for (int i = 0; i < symbol_table_index; ++i)
     {
         if (!symbol_table[i].is_used) // Skip used symbols

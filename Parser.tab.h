@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 88 "Parser.y"
+#line 63 "Parser.y"
 
 #include<stdbool.h>
 
@@ -111,9 +111,9 @@ extern int yydebug;
     CHAR_VALUE = 306,              /* CHAR_VALUE  */
     INTEGER_VALUE = 307,           /* INTEGER_VALUE  */
     FLOAT_VALUE = 308,             /* FLOAT_VALUE  */
-    BITWISE_NOT = 309,             /* BITWISE_NOT  */
-    PRE_POST_INC = 310,            /* PRE_POST_INC  */
-    PRE_POST_DEC = 311             /* PRE_POST_DEC  */
+    PRE_POST_INC = 309,            /* PRE_POST_INC  */
+    PRE_POST_DEC = 310,            /* PRE_POST_DEC  */
+    BITWISE_NOT = 311              /* BITWISE_NOT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -122,7 +122,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 78 "Parser.y"
+#line 53 "Parser.y"
  
  int int_type;
  char* string_type; 
