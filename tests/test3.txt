@@ -1,0 +1,47 @@
+int add(int a,int b, int c){
+    return a+b+c;
+}
+
+float power(float base,int exp){
+    float res=1.0;
+    for(int i=0;i<exp;i++;){
+        res*=base;
+    }
+    return res;
+}
+
+bool is_even(int n){
+    return (n%2)==0;
+}
+
+bool toggle(bool v){
+    return !v;
+}
+
+int main()
+{
+    int i=3;
+    float f=power(2.0,3);
+    bool flag1=toggle(true);
+    bool flag2=toggle(false);
+
+    {
+        int scoped=5;
+        {
+            int scoped =10;
+            i+=scoped;
+            scoped+=add(1,2,3);
+            scoped+=add(1,2,3);
+            scoped+=add(1,2,3);
+        }
+    }
+
+    f*=power(1.5,1);
+    i<<=1;
+    i>>=2;
+    i|=3;
+    i&=7;
+    i^=1;
+
+    return i;
+}

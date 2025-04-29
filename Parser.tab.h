@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 63 "Parser.y"
+#line 64 "Parser.y"
 
 #include<stdbool.h>
 
@@ -86,34 +86,45 @@ extern int yydebug;
     NOT_EQUAL = 281,               /* NOT_EQUAL  */
     BITWISE_OR = 282,              /* BITWISE_OR  */
     BITWISE_AND = 283,             /* BITWISE_AND  */
-    BITWISE = 284,                 /* BITWISE  */
-    NOT = 285,                     /* NOT  */
-    SEMICOLON = 286,               /* SEMICOLON  */
-    COMMA = 287,                   /* COMMA  */
-    MOD = 288,                     /* MOD  */
-    ADD = 289,                     /* ADD  */
-    SUB = 290,                     /* SUB  */
-    MUL = 291,                     /* MUL  */
-    DIV = 292,                     /* DIV  */
-    POW = 293,                     /* POW  */
-    SHIFT_LEFT = 294,              /* SHIFT_LEFT  */
-    SHIFT_RIGHT = 295,             /* SHIFT_RIGHT  */
-    GREATER_THAN = 296,            /* GREATER_THAN  */
-    LESS_THAN = 297,               /* LESS_THAN  */
-    ASSIGN = 298,                  /* ASSIGN  */
-    GREATER_EQUAL = 299,           /* GREATER_EQUAL  */
-    LESS_EQUAL = 300,              /* LESS_EQUAL  */
-    POST_INC = 301,                /* POST_INC  */
-    POST_DEC = 302,                /* POST_DEC  */
-    CONSTANT = 303,                /* CONSTANT  */
-    IDENTIFIER = 304,              /* IDENTIFIER  */
-    STRING_VALUE = 305,            /* STRING_VALUE  */
-    CHAR_VALUE = 306,              /* CHAR_VALUE  */
-    INTEGER_VALUE = 307,           /* INTEGER_VALUE  */
-    FLOAT_VALUE = 308,             /* FLOAT_VALUE  */
-    PRE_POST_INC = 309,            /* PRE_POST_INC  */
-    PRE_POST_DEC = 310,            /* PRE_POST_DEC  */
-    BITWISE_NOT = 311              /* BITWISE_NOT  */
+    BITWISE_NOT = 284,             /* BITWISE_NOT  */
+    SEMICOLON = 285,               /* SEMICOLON  */
+    COMMA = 286,                   /* COMMA  */
+    MOD = 287,                     /* MOD  */
+    ADD = 288,                     /* ADD  */
+    SUB = 289,                     /* SUB  */
+    MUL = 290,                     /* MUL  */
+    DIV = 291,                     /* DIV  */
+    POW = 292,                     /* POW  */
+    SHIFT_LEFT = 293,              /* SHIFT_LEFT  */
+    SHIFT_RIGHT = 294,             /* SHIFT_RIGHT  */
+    GREATER_THAN = 295,            /* GREATER_THAN  */
+    LESS_THAN = 296,               /* LESS_THAN  */
+    ASSIGN = 297,                  /* ASSIGN  */
+    GREATER_EQUAL = 298,           /* GREATER_EQUAL  */
+    LESS_EQUAL = 299,              /* LESS_EQUAL  */
+    POST_INC = 300,                /* POST_INC  */
+    POST_DEC = 301,                /* POST_DEC  */
+    CONSTANT = 302,                /* CONSTANT  */
+    IDENTIFIER = 303,              /* IDENTIFIER  */
+    STRING_VALUE = 304,            /* STRING_VALUE  */
+    CHAR_VALUE = 305,              /* CHAR_VALUE  */
+    INTEGER_VALUE = 306,           /* INTEGER_VALUE  */
+    FLOAT_VALUE = 307,             /* FLOAT_VALUE  */
+    ADD_ASSIGN = 308,              /* ADD_ASSIGN  */
+    SUB_ASSIGN = 309,              /* SUB_ASSIGN  */
+    MUL_ASSIGN = 310,              /* MUL_ASSIGN  */
+    DIV_ASSIGN = 311,              /* DIV_ASSIGN  */
+    MOD_ASSIGN = 312,              /* MOD_ASSIGN  */
+    POW_ASSIGN = 313,              /* POW_ASSIGN  */
+    BITWISE_AND_ASSIGN = 314,      /* BITWISE_AND_ASSIGN  */
+    BITWISE_OR_ASSIGN = 315,       /* BITWISE_OR_ASSIGN  */
+    BITWISE_NOT_ASSIGN = 316,      /* BITWISE_NOT_ASSIGN  */
+    LOGICAL_AND_ASSIGN = 317,      /* LOGICAL_AND_ASSIGN  */
+    LOGICAL_OR_ASSIGN = 318,       /* LOGICAL_OR_ASSIGN  */
+    SHIFT_LEFT_ASSIGN = 319,       /* SHIFT_LEFT_ASSIGN  */
+    SHIFT_RIGHT_ASSIGN = 320,      /* SHIFT_RIGHT_ASSIGN  */
+    PRE_POST_INC = 321,            /* PRE_POST_INC  */
+    PRE_POST_DEC = 322             /* PRE_POST_DEC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -122,7 +133,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 53 "Parser.y"
+#line 54 "Parser.y"
  
  int int_type;
  char* string_type; 
@@ -131,7 +142,7 @@ union YYSTYPE
  char char_type;
  struct Node *node;
 
-#line 135 "Parser.tab.h"
+#line 146 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

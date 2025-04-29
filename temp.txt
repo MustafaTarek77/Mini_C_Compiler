@@ -41,7 +41,7 @@ float y = 2.0 + c * (a + b);
 bool flag = f && (a < b) || (b == 10);
 
 // Errors: type mismatches
-// int bad1 = "oops";
+//int bad1 = "oops";
 // float bad2 = 'b' + 4;
 
 // Print
@@ -125,9 +125,9 @@ void say_hello() {
 }
 
 // Error: missing return in non-void
-// int error_func() {
-//     print("no return");
-// }
+int error_func() {
+    print("no return");
+ }
 
 // Error: return value in void function
 // void error_func2() {

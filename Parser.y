@@ -32,6 +32,7 @@
     Node *check_valid_types_arithmetic(Node *operand1, Node *operand2, int curr_line);
     Node *check_valid_types_bool(Node *operand1, Node *operand2, int curr_line);
     Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line);
+    Node *check_valid_types_bitwise_not(Node *operand1, int curr_line);
     void end_scope(int line_number);
     int get_symbol_declaration_line(char *identifier);
     int add_symbol(char *ident_data_type, char *identifier, char *type, int line_number, bool is_function_parameter);
@@ -66,9 +67,22 @@
 
 %token INT FLOAT CHAR BOOL STRING
 %token PRINT VOID RETURN CONTINUE SWITCH BREAK CASE DEFAULT IF ELSE FOR WHILE DO 
-%token BOOL_VALUE LOGICAL_AND LOGICAL_OR LOGICAL_NOT EQUAL NOT_EQUAL BITWISE_OR BITWISE_AND BITWISE NOT
+%token BOOL_VALUE LOGICAL_AND LOGICAL_OR LOGICAL_NOT EQUAL NOT_EQUAL BITWISE_OR BITWISE_AND BITWISE_NOT
 %token SEMICOLON COMMA MOD ADD SUB MUL DIV POW SHIFT_LEFT SHIFT_RIGHT GREATER_THAN LESS_THAN ASSIGN GREATER_EQUAL LESS_EQUAL POST_INC POST_DEC
 %token CONSTANT IDENTIFIER STRING_VALUE CHAR_VALUE INTEGER_VALUE FLOAT_VALUE
+%token ADD_ASSIGN      // for +=
+%token SUB_ASSIGN      // for -=
+%token MUL_ASSIGN      // for *=
+%token DIV_ASSIGN      // for /=
+%token MOD_ASSIGN      // for %=
+%token POW_ASSIGN      // for ^=
+%token BITWISE_AND_ASSIGN   // for &=
+%token BITWISE_OR_ASSIGN    // for |=
+%token BITWISE_NOT_ASSIGN   // for ~=
+%token LOGICAL_AND_ASSIGN   // for &&=
+%token LOGICAL_OR_ASSIGN    // for ||=
+%token SHIFT_LEFT_ASSIGN
+%token SHIFT_RIGHT_ASSIGN
 
 %left LOGICAL_OR
 %left LOGICAL_AND
@@ -187,6 +201,7 @@ case_statement:
     CASE INTEGER_VALUE 
     { 
         push_case_value();
+        fprintf(quadrupleFilePointer, "\tpush %d\n", $2);
         fprintf(quadrupleFilePointer, "\t%s\n", "equal");
         jump_if_false(++false_label_counter); 
     }
@@ -198,6 +213,7 @@ case_statement:
     | CASE CHAR_VALUE 
     { 
         push_case_value();
+        fprintf(quadrupleFilePointer, "\tpush '%s'\n", $2);
         fprintf(quadrupleFilePointer, "\t%s\n", "equal");
         jump_if_false(++false_label_counter); 
     }
@@ -267,6 +283,215 @@ assignment_statement:
     expression SEMICOLON 
     { 
         write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER ADD_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tadd\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER SUB_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tsub\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER MUL_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tmul\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER DIV_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tdiv\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER POW_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tpow\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER MOD_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tmod\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER LOGICAL_AND_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tlogical_and\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER LOGICAL_OR_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tlogical_or\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER BITWISE_AND_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tbitwise_and\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER BITWISE_OR_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tbitwise_or\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER BITWISE_NOT_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tbitwise_not\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER SHIFT_LEFT_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tshift_left\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
+    }
+    | IDENTIFIER SHIFT_RIGHT_ASSIGN 
+    { 
+        insertion_index = check_symbol($1, 1, yylineno); 
+        if(strcmp(symbol_table[insertion_index].type , "constant")==0){
+            printf("Error at line: %d constants must not be reassigned\n", yylineno);
+            fprintf(error_output_file, "Error at line: %d constants must not be reassigned\n", yylineno);
+            exit(EXIT_FAILURE);
+        }
+        write_identifier_quadruple($1, "push");
+    } 
+    expression SEMICOLON 
+    { 
+        fprintf(quadrupleFilePointer, "\tshift_right\n");
+        write_identifier_quadruple($1, "pop"); 
+        insertion_index = -1;
     }
     ;
 
@@ -331,7 +556,7 @@ expression:
     IDENTIFIER PRE_POST_INC
     { 
         int i = check_symbol($1, 0, yylineno);
-        check_variable_type(i, yylineno);
+        // check_variable_type(i, yylineno);
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($1, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "post_inc");
@@ -340,7 +565,7 @@ expression:
     IDENTIFIER PRE_POST_DEC
     { 
         int i = check_symbol($1, 0, yylineno);
-        check_variable_type(i, yylineno);
+        // check_variable_type(i, yylineno);
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($1, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "post_dec");
@@ -348,7 +573,7 @@ expression:
     | PRE_POST_INC IDENTIFIER
     { 
         int i = check_symbol($2, 0, yylineno);
-        check_variable_type(i, yylineno);
+        // check_variable_type(i, yylineno);
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($2, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "pre_inc");
@@ -357,7 +582,7 @@ expression:
     PRE_POST_DEC IDENTIFIER 
     { 
         int i = check_symbol($2, 0, yylineno);
-        check_variable_type(i, yylineno);
+        // check_variable_type(i, yylineno);
         $$ = create_node(symbol_table[i].ident_data_type);
         write_identifier_quadruple($2, "push");
         fprintf(quadrupleFilePointer, "\t%s\n", "pre_dec");
@@ -408,6 +633,12 @@ expression:
     { 
         $$ = check_valid_types_bool($2, NULL, yylineno);
         fprintf(quadrupleFilePointer, "\t%s\n", "logical_not");
+    }
+
+    | BITWISE_NOT expression
+    { 
+        $$ = check_valid_types_bitwise_not($2, yylineno);
+        fprintf(quadrupleFilePointer, "\t%s\n", "bitwise_not");
     }
     
     | expression ADD expression
@@ -559,6 +790,7 @@ function_declaration:
     '(' parameters_list ')' 
     { 
         curr_function_index = add_symbol($1, $2, "function", yylineno, 0);
+        symbol_table[curr_function_index].scope_level = block_counter ;
         pop_function_parameters(curr_function_index); 
     }
     block 
@@ -684,8 +916,24 @@ Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line)
 
     if (strcmp(operand1->type, "int") != 0 || strcmp(operand2->type, "int") != 0)
     {
-        printf("Error at line %d: Invalid types for bitwise operator\n", curr_line);
-        fprintf(error_output_file, "Error at line %d: Invalid types for bitwise operator\n", curr_line);
+        printf("Error at line %d: Invalid types for bitwise operator expecting integer\n", curr_line);
+        fprintf(error_output_file, "Error at line %d: Invalid types for bitwise operator expecting integer\n", curr_line);
+        exit(EXIT_FAILURE);
+    }
+
+    res->type = "int";
+    return res;
+}
+
+Node *check_valid_types_bitwise_not(Node *operand1, int curr_line)
+{
+    Node *res = (Node *)malloc(sizeof(Node));
+    check_mem_alloc(res);
+
+    if (strcmp(operand1->type, "int") != 0)
+    {
+        printf("Error at line %d: Invalid types for bitwise operator expecting integer\n", curr_line);
+        fprintf(error_output_file, "Error at line %d: Invalid types for bitwise operator expecting integer\n", curr_line);
         exit(EXIT_FAILURE);
     }
 
@@ -696,7 +944,8 @@ Node *check_valid_types_bitwise(Node *operand1, Node *operand2, int curr_line)
 void end_scope(int line_number)
 {
     // Function Return Validations
-    if (curr_function_index != -1 && strcmp(symbol_table[curr_function_index].type, "function") == 0)
+    if (curr_function_index != -1 && strcmp(symbol_table[curr_function_index].type, "function") == 0 &&
+        symbol_table[curr_function_index].scope_level == block_counter-1)
     {
         // Non-void function missing return
         if (!has_return && strcmp(symbol_table[curr_function_index].ident_data_type, "void") != 0)
@@ -845,7 +1094,7 @@ static void push_correct_value_based_on_type(const char *type, int int_val, floa
 
 static void validate_assignment_type(int index, const char *expected_type, const char *value_type, int line_number)
 {
-    if ((strcmp(expected_type, "string") == 0 || strcmp(expected_type, "char") == 0 || strcmp(expected_type, "void") == 0))
+    if ((strcmp(expected_type, "string") == 0 || strcmp(expected_type, "void") == 0))
     {
         printf("Error at line %d: %s '%s' variable assigned '%s' value\n",
                line_number, symbol_table[index].identifier, expected_type, value_type);
@@ -996,6 +1245,8 @@ bool are_types_compatible(const char *type1, const char *type2,int from_func)
     if(from_func==1){
         if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
             (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
+            (strcmp(type1, "char") == 0 && strcmp(type2, "int") == 0) ||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "char") == 0) ||
             (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0)||
             (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0)||
             (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0)||
@@ -1008,6 +1259,8 @@ bool are_types_compatible(const char *type1, const char *type2,int from_func)
     else {
         if ((strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||
             (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0) ||
+            (strcmp(type1, "char") == 0 && strcmp(type2, "int") == 0) ||
+            (strcmp(type1, "int") == 0 && strcmp(type2, "char") == 0) ||
             (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||
             (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0)||
             (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0)||

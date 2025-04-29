@@ -1,16 +1,1 @@
-warning: identifier d declared at line 5 but never used
-warning: identifier e declared at line 6 but never used
-warning: identifier ci declared at line 10 but never used
-warning: identifier cf declared at line 11 but never used
-warning: identifier cc declared at line 12 but never used
-warning: identifier cs declared at line 13 but never used
-warning: identifier cb declared at line 14 but never used
-warning: identifier flag declared at line 41 but never used
-warning: argument x declared in function at line 114 but never used
-warning: argument y declared in function at line 114 but never used
-warning: argument a declared in function at line 118 but never used
-warning: argument b declared in function at line 118 but never used
-warning: identifier result declared at line 138 but never used
-warning: identifier prod declared at line 139 but never used
-warning: identifier unused_var declared at line 147 but never used
-warning: function never_called declared at line 150 but never used
+warning: identifier x declared at line 1 but never used

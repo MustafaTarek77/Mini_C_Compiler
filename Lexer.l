@@ -25,6 +25,98 @@
                         return *yytext; 
                     }
 
+
+"+="        { 
+    #if LOG_ENABLED
+        log_token("ADD_ASSIGN");
+    #endif
+    return ADD_ASSIGN;
+}  
+
+"-="        { 
+    #if LOG_ENABLED
+        log_token("SUB_ASSIGN");
+    #endif
+    return SUB_ASSIGN;
+}  
+
+"*="        { 
+    #if LOG_ENABLED
+        log_token("MUL_ASSIGN");
+    #endif
+    return MUL_ASSIGN;
+}  
+
+"/="        { 
+    #if LOG_ENABLED
+        log_token("DIV_ASSIGN");
+    #endif
+    return DIV_ASSIGN;
+}  
+
+"%="        { 
+    #if LOG_ENABLED
+        log_token("MOD_ASSIGN");
+    #endif
+    return MOD_ASSIGN;
+}  
+
+"^="        { 
+    #if LOG_ENABLED
+        log_token("POW_ASSIGN");
+    #endif
+    return POW_ASSIGN;
+}  
+
+"&&="        { 
+    #if LOG_ENABLED
+        log_token("LOGICAL_AND_ASSIGN");
+    #endif
+    return LOGICAL_AND_ASSIGN;
+}  
+
+"||="        { 
+    #if LOG_ENABLED
+        log_token("LOGICAL_OR_ASSIGN");
+    #endif
+    return LOGICAL_OR_ASSIGN;
+}  
+
+"&="        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_AND_ASSIGN");
+    #endif
+    return BITWISE_AND_ASSIGN;
+}  
+
+"|="        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_OR_ASSIGN");
+    #endif
+    return BITWISE_OR_ASSIGN;
+}  
+
+"~="        { 
+    #if LOG_ENABLED
+        log_token("BITWISE_NOT_ASSIGN");
+    #endif
+    return BITWISE_NOT_ASSIGN;
+}  
+
+"<<="        { 
+    #if LOG_ENABLED
+        log_token("SHIFT_LEFT_ASSIGN");
+    #endif
+    return SHIFT_LEFT_ASSIGN;
+}  
+
+">>="        { 
+    #if LOG_ENABLED
+        log_token("SHIFT_RIGHT_ASSIGN");
+    #endif
+    return SHIFT_RIGHT_ASSIGN;
+}  
+
 "="        { 
     #if LOG_ENABLED
         log_token("ASSIGN");
@@ -343,7 +435,7 @@
     return IDENTIFIER; 
 }
 
-[0-9]+         { 
+[0-9]+         {  
     yylval.int_type = atoi(yytext);
     #if LOG_ENABLED
         log_token("INTEGER_VALUE");
